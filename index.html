@@ -58,7 +58,7 @@
 
         /* Header Bar */
         .top-bar {
-            height: 95px;
+            height: 85px;
             background-color: var(--bg-panel);
             border-bottom: 1px solid var(--border);
             display: flex;
@@ -74,35 +74,37 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            line-height: 1;
-            margin-top: -5px;
+            line-height: 1.1;
+            margin-top: -2px;
         }
 
         .brand-logo {
-            height: 52px;
-            max-width: 200px;
+            height: 44px;
+            max-width: 220px;
             object-fit: contain;
+            margin-bottom: -6px;
         }
 
         .brand-subtext {
             font-family: 'ImpactCustom', Impact, sans-serif;
-            font-size: 16px;
+            font-size: 14px;
             letter-spacing: 1.5px;
             color: #05BDFB;
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
         .brand-link {
-            font-size: 8px;
-            color: var(--text-sub);
+            font-size: 9px;
+            color: var(--accent);
             text-decoration: none;
-            margin-top: 2px;
-            transition: color 0.15s;
+            margin-top: 1px;
+            font-weight: 600;
+            opacity: 0.9;
         }
 
         .brand-link:hover {
-            color: var(--accent);
             text-decoration: underline;
+            opacity: 1;
         }
 
         .icon-btn {
@@ -140,24 +142,34 @@
             flex-shrink: 0;
         }
 
-        /* Workspace Canvas Area dengan Panning & Zooming */
+        /* Workspace Canvas Area dengan Pan & Zoom */
         .workspace {
-            flex: 1;
-            position: relative;
+            position: absolute;
+            top: 85px;
+            bottom: 60px;
+            left: 0;
+            width: 100vw;
             background-color: #e2eaf4;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            padding: 10px;
             touch-action: none;
+            cursor: grab;
+            z-index: 10;
+        }
+
+        .workspace:active {
+            cursor: grabbing;
         }
 
         #stage-container {
-            position: absolute;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 20px rgba(5, 189, 251, 0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
             transform-origin: center center;
             will-change: transform;
         }
@@ -361,12 +373,15 @@
 
         /* Inspector Panel Bawah & Tombol Segitiga */
         .inspector-container {
-            position: relative;
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            width: 100%;
             background-color: var(--bg-panel);
             border-top: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            z-index: 50;
+            z-index: 40;
             transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
             flex-shrink: 0;
         }
@@ -489,6 +504,7 @@
             display: flex;
             gap: 6px;
             align-items: center;
+            font-size: 10px;
         }
 
         input[type="range"] {
@@ -552,6 +568,10 @@
 
         /* Footer Bar Toolbar */
         .footer-tools {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
             height: 60px;
             background-color: var(--bg-panel);
             border-top: 1px solid var(--border);
@@ -561,6 +581,7 @@
             padding: 0 4px;
             overflow-x: auto;
             touch-action: pan-x;
+            z-index: 50;
             flex-shrink: 0;
         }
 
@@ -592,52 +613,47 @@
             stroke-width: 2;
         }
 
-        /* Modal Custom CSS Buatan (Export & Import XML) */
-        .custom-modal-overlay {
+        /* Modals & CSS Popups */
+        .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(4px);
-            z-index: 400;
+            z-index: 300;
             display: none;
             align-items: center;
             justify-content: center;
         }
-        .custom-modal-overlay.open { display: flex; }
 
-        .custom-modal-card {
+        .modal-overlay.open { display: flex; }
+
+        .custom-popup {
             background: var(--bg-panel);
             border: 1px solid var(--border);
             border-radius: 12px;
+            padding: 16px;
             width: 90%;
             max-width: 340px;
-            padding: 16px;
             display: flex;
             flex-direction: column;
             gap: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .custom-modal-title {
-            font-size: 12px;
+        .popup-title {
+            font-size: 13px;
             font-weight: 800;
             color: var(--text-main);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
         }
 
         /* Modal Crop Gambar */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
+        #cropModal {
             background: #121212;
-            z-index: 300;
-            display: none;
             flex-direction: column;
         }
-
-        .modal-overlay.open { display: flex; }
 
         .crop-header {
             height: 48px;
@@ -776,6 +792,52 @@
             fill: none;
             stroke-width: 2;
         }
+
+        /* Loading & Toast Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 400;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            gap: 12px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .loading-overlay.open { display: flex; }
+
+        .spinner {
+            width: 36px; height: 36px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .toast-msg {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #0f172a;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            z-index: 500;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 1px solid var(--accent);
+        }
     </style>
 </head>
 <body>
@@ -791,11 +853,11 @@
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
         </button>
         
-        <!-- Logo & Subtitle & Link Saweria -->
+        <!-- Logo, Subtitle & Link Tambahan -->
         <div class="brand-container">
             <img src="logo.png" alt="MYshoot Logo" class="brand-logo" />
             <span class="brand-subtext">MYshoot EDITOR</span>
-            <a href="https://saweria.co/kepalabug" target="_blank" class="brand-link">https://saweria.co/kepalabug</a>
+            <a href="https://saweria.co/kepalabug" target="_blank" rel="noopener noreferrer" class="brand-link">https://saweria.co/kepalabug</a>
         </div>
 
         <div style="display:flex; gap:4px;">
@@ -809,7 +871,7 @@
         </div>
     </div>
 
-    <!-- Workspace Area (Zoom, Pan & Canvas Container) -->
+    <!-- Workspace Area -->
     <div class="workspace" id="workspace">
         <div id="stage-container">
             <canvas id="stage" width="720" height="1280"></canvas>
@@ -840,10 +902,10 @@
             <button class="tab-btn active" onclick="switchTab('canvas', this)" title="Canvas Layout">
                 <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
             </button>
-            <button class="tab-btn" onclick="switchTab('core', this)" title="Color Adjustments">
+            <button class="tab-btn" onclick="switchTab('core', this)" title="Warna & Bayangan/Outline">
                 <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/></svg>
             </button>
-            <button class="tab-btn" onclick="switchTab('transform', this)" title="Transform & Rotor Alight Motion">
+            <button class="tab-btn" onclick="switchTab('transform', this)" title="Transform & Perspektif">
                 <svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
             </button>
             <button class="tab-btn" onclick="switchTab('shape', this)" title="Bentuk Geometris">
@@ -876,11 +938,6 @@
                         <button class="btn-ui" onclick="updateCanvasBg('transparent')">TRANSPARAN</button>
                     </div>
                 </div>
-                <div class="control-block">
-                    <div class="label-row"><span>IMPORT TEMPLATE XML</span></div>
-                    <button class="btn-ui" style="background:var(--accent); color:#fff; border-color:var(--accent);" onclick="triggerImportXML()">PILIH FILE XML TEMPLATE</button>
-                    <input type="file" id="xmlFileLoader" accept=".xml" style="display:none;" onchange="importXMLTemplate(event)">
-                </div>
             </div>
 
             <!-- CORE ADJUSTMENTS -->
@@ -905,9 +962,31 @@
                         <input type="range" id="p-blur" min="0" max="20" value="0" oninput="applyPipeline()">
                     </div>
                 </div>
+
+                <!-- EFEK BAYANGAN SEMUA OBJEK -->
+                <div class="control-block">
+                    <div class="label-row"><span>EFEK BAYANGAN (SEMUA OBJEK)</span></div>
+                    <div class="grid-2">
+                        <div class="control-row"><span>WARNA:</span><input type="color" id="p-obj-shadow-color" value="#000000" onchange="updateObjectEffects()"></div>
+                        <div class="control-row"><span>BLUR:</span><input type="range" id="p-obj-shadow-blur" min="0" max="40" value="0" oninput="updateObjectEffects()"></div>
+                    </div>
+                    <div class="grid-2" style="margin-top:4px;">
+                        <div class="control-row"><span>OFFSET X:</span><input type="range" id="p-obj-shadow-x" min="-30" max="30" value="0" oninput="updateObjectEffects()"></div>
+                        <div class="control-row"><span>OFFSET Y:</span><input type="range" id="p-obj-shadow-y" min="-30" max="30" value="0" oninput="updateObjectEffects()"></div>
+                    </div>
+                </div>
+
+                <!-- EFEK OUTLINE SEMUA OBJEK -->
+                <div class="control-block">
+                    <div class="label-row"><span>OUTLINE (SEMUA OBJEK)</span></div>
+                    <div class="grid-2">
+                        <div class="control-row"><span>WARNA:</span><input type="color" id="p-obj-outline-color" value="#ffffff" onchange="updateObjectEffects()"></div>
+                        <div class="control-row"><span>TEBAL:</span><input type="range" id="p-obj-outline-w" min="0" max="20" value="0" oninput="updateObjectEffects()"></div>
+                    </div>
+                </div>
             </div>
 
-            <!-- TRANSFORM DENGAN PERSPEKTIF, ROTOR UKURAN, ROTASI & EFEK UNIVERSAL -->
+            <!-- TRANSFORM -->
             <div id="pane-transform" class="panel-pane">
                 <div class="control-block">
                     <div class="label-row"><span>ROTOR UKURAN (SCALE)</span><span id="v-rotor-scale">1.0x</span></div>
@@ -917,29 +996,23 @@
                     <div class="label-row"><span>ROTOR ROTASI (Z ROTATION)</span><span id="v-rotor-rot">0°</span></div>
                     <input type="range" id="p-rotor-rot" min="0" max="360" value="0" oninput="updateRotorTransform()">
                 </div>
+
                 <div class="control-block">
-                    <div class="label-row"><span>PERSPEKTIF MENCORONG (SKEW X / Y)</span></div>
+                    <div class="label-row"><span>PERSPEKTIF & SKEW</span></div>
                     <div class="grid-2">
-                        <div class="control-row"><span>X:</span><input type="range" id="p-skew-x" min="-50" max="50" value="0" oninput="updateRotorTransform()"></div>
-                        <div class="control-row"><span>Y:</span><input type="range" id="p-skew-y" min="-50" max="50" value="0" oninput="updateRotorTransform()"></div>
+                        <div class="control-row"><span>SKEW X:</span><input type="range" id="p-skew-x" min="-60" max="60" value="0" oninput="updatePerspectiveTransform()"></div>
+                        <div class="control-row"><span>SKEW Y:</span><input type="range" id="p-skew-y" min="-60" max="60" value="0" oninput="updatePerspectiveTransform()"></div>
+                    </div>
+                    <div class="grid-2" style="margin-top:4px;">
+                        <div class="control-row"><span>PERSP X:</span><input type="range" id="p-persp-x" min="-100" max="100" value="0" oninput="updatePerspectiveTransform()"></div>
+                        <div class="control-row"><span>PERSP Y:</span><input type="range" id="p-persp-y" min="-100" max="100" value="0" oninput="updatePerspectiveTransform()"></div>
                     </div>
                 </div>
-                <div class="control-block">
-                    <div class="label-row"><span>EFEK BAYANGAN & OUTLINE OBJEK</span></div>
-                    <div class="grid-2">
-                        <div class="control-row"><span>WARNA OUTLINE:</span><input type="color" id="p-obj-outline-color" value="#ffffff" onchange="updateObjectEffects()"></div>
-                        <div class="control-row"><span>TEBAL:</span><input type="range" id="p-obj-outline-w" min="0" max="15" value="0" oninput="updateObjectEffects()"></div>
-                    </div>
-                    <div class="control-row" style="margin-top:4px;">
-                        <label style="font-size:10px; display:flex; gap:4px; align-items:center;">
-                            <input type="checkbox" id="p-obj-shadow" onchange="updateObjectEffects()"> AKTIFKAN EFEK BAYANGAN OBJEK
-                        </label>
-                    </div>
-                </div>
+
                 <div class="grid-3">
-                    <button class="btn-ui" style="background:#05BDFB; color:#fff; border-color:#05BDFB;" onclick="fitToCanvasArea()">ISI CANVAS</button>
-                    <button class="btn-ui" style="background:var(--danger); color:#fff; border-color:var(--danger);" onclick="deleteActiveLayer()">HAPUS</button>
+                    <button class="btn-ui" style="background:#05BDFB; color:#fff; border-color:#05BDFB;" onclick="fitToCanvasArea()">PAS CANVAS</button>
                     <button class="btn-ui" onclick="duplicateActiveLayer()">DUPLIKAT</button>
+                    <button class="btn-ui" style="background:var(--danger); color:#fff; border-color:var(--danger);" onclick="deleteActiveLayer()">HAPUS</button>
                 </div>
                 <div class="grid-2">
                     <button class="btn-ui" onclick="flipLayer('h')">FLIP HORISONTAL</button>
@@ -983,7 +1056,7 @@
                 </div>
             </div>
 
-            <!-- TEKS DENGAN FITUR OUTLINE & 3D DIPERBAIKI -->
+            <!-- TEKS -->
             <div id="pane-text" class="panel-pane">
                 <div class="grid-2">
                     <button class="btn-ui" style="background:var(--accent); color:#ffffff; border-color:var(--accent);" onclick="addCenterTextLayer()">+ TEKS BARU</button>
@@ -1013,19 +1086,18 @@
                         <option value="justify">Justify (Rata Kiri Kanan)</option>
                     </select>
                 </div>
-                <!-- Pengaturan Outline Teks -->
                 <div class="control-block">
                     <div class="label-row"><span>OUTLINE / GARIS TEPI TEKS</span></div>
                     <div class="grid-2">
                         <div class="control-row"><span>WARNA:</span><input type="color" id="p-text-outline-color" value="#ffffff" onchange="updateTextProps()"></div>
                         <div class="control-row">
                             <span>TEBAL:</span>
-                            <input type="range" id="p-text-outline-w" min="0" max="15" value="0" oninput="updateTextProps()">
+                            <input type="range" id="p-text-outline-w" min="0" max="25" value="0" oninput="updateTextProps()">
                         </div>
                     </div>
                 </div>
                 <div class="control-block">
-                    <div class="label-row"><span>EFEK TAMBAHAN TEKS</span></div>
+                    <div class="label-row"><span>EFEK 3D & BAYANGAN TEKS</span></div>
                     <div class="grid-2">
                         <label style="font-size:10px; display:flex; gap:4px; align-items:center;">
                             <input type="checkbox" id="p-text-3d" onchange="updateTextProps()"> TEKS 3D
@@ -1034,26 +1106,28 @@
                             <input type="checkbox" id="p-text-shadow" onchange="updateTextProps()"> BAYANGAN
                         </label>
                     </div>
+                    <div class="grid-2" style="margin-top:4px;">
+                        <div class="control-row"><span>3D COLOR:</span><input type="color" id="p-text-3d-color" value="#000000" onchange="updateTextProps()"></div>
+                        <div class="control-row"><span>3D DEPTH:</span><input type="range" id="p-text-3d-depth" min="1" max="25" value="8" oninput="updateTextProps()"></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- OVERLAY & GALERI (DENGAN TOMBOL ICON & FITUR GANTI FOTO) -->
+            <!-- OVERLAY & GALERI -->
             <div id="pane-blend" class="panel-pane">
-                <div class="control-block">
-                    <div class="label-row"><span>SUMBER GAMBAR</span></div>
-                    <div class="grid-2">
-                        <button class="icon-btn" style="width:100%; height:36px;" onclick="document.getElementById('galleryInput').click()" title="Upload Gambar Baru">
-                            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                            <span>TAMBAH FOTO</span>
-                        </button>
-                        <button class="icon-btn" style="width:100%; height:36px;" onclick="document.getElementById('replaceInput').click()" title="Ganti Foto Objek Aktif">
-                            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>
-                            <span>GANTI FOTO</span>
-                        </button>
-                    </div>
-                    <input type="file" id="galleryInput" accept="image/*" style="display:none;" onchange="openCropModal(event, false)">
-                    <input type="file" id="replaceInput" accept="image/*" style="display:none;" onchange="openCropModal(event, true)">
+                <div class="grid-2">
+                    <label class="btn-ui" style="display:flex; gap:6px;">
+                        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        TAMBAH GAMBAR
+                        <input type="file" accept="image/*" style="display:none;" onchange="openCropModal(event)">
+                    </label>
+                    <label class="btn-ui" style="display:flex; gap:6px; background:#e0f2fe; border-color:var(--accent);">
+                        <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:2;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        GANTI FOTO
+                        <input type="file" accept="image/*" style="display:none;" onchange="replaceActivePhoto(event)">
+                    </label>
                 </div>
+
                 <div class="control-block">
                     <div class="label-row"><span>BLEND MODE</span></div>
                     <select id="p-blend-mode" onchange="updateBlendProps()">
@@ -1071,7 +1145,7 @@
         </div>
     </div>
 
-    <!-- Footer Tools -->
+    <!-- Footer Tools Toolbar -->
     <div class="footer-tools">
         <div class="tool-node active" id="tool-select" onclick="setTool('select', this)">
             <svg viewBox="0 0 24 24"><path d="M3 3l7 18 3-7 7-3L3 3z"/></svg>GESER
@@ -1085,37 +1159,38 @@
         <div class="tool-node" onclick="switchTab('blend', document.querySelectorAll('.tab-btn')[5])">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>GALERI
         </div>
+        <label class="tool-node">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+            IMPORT XML
+            <input type="file" id="xmlImporter" accept=".xml" style="display:none;" onchange="importXMLTemplate(event)">
+        </label>
     </div>
 </div>
 
-<!-- Modal Pop-up Export CSS Buatan -->
-<div class="custom-modal-overlay" id="exportModal">
-    <div class="custom-modal-card">
-        <div class="custom-modal-title">
-            <span>PENGATURAN EXPORT FILE</span>
-            <button class="btn-ui" style="padding:2px 6px;" onclick="closeExportModal()">✕</button>
-        </div>
+<!-- Modal Pop-up Export -->
+<div class="modal-overlay" id="exportModal">
+    <div class="custom-popup">
+        <div class="popup-title">EXPORT GAMBAR / TEMPLATE</div>
+        
         <div class="control-block">
-            <div class="label-row"><span>FORMAT GAMBAR / TEMPLATE</span></div>
-            <select id="export-format">
-                <option value="image/png">PNG (Lossless / Transparan)</option>
-                <option value="image/jpeg">JPG / JPEG (Kompresi Ringan)</option>
-                <option value="xml">XML Template Project (.xml)</option>
+            <div class="label-row"><span>PILIH FORMAT FILE</span></div>
+            <select id="exportFormat" onchange="toggleExportQualityInput()">
+                <option value="png">PNG (Transparan / Gambar Berkualitas)</option>
+                <option value="jpeg">JPG / JPEG (Ukuran Kompresi)</option>
+                <option value="webp">WEBP (Format Web Modern)</option>
+                <option value="xml">XML (File Template Sesuai Gambar)</option>
             </select>
         </div>
-        <div class="control-block" id="quality-block">
-            <div class="label-row"><span>KUALITAS EXPORT</span><span id="v-export-q">90%</span></div>
-            <input type="range" id="p-export-quality" min="10" max="100" value="90" oninput="document.getElementById('v-export-q').innerText = this.value + '%'">
-        </div>
-        <button class="btn-ui" style="background:var(--accent); color:#fff; border-color:var(--accent); padding:10px; font-weight:800;" onclick="executeExport()">DOWNLOAD SEKARANG</button>
-    </div>
-</div>
 
-<!-- Modal Loading XML Import -->
-<div class="custom-modal-overlay" id="loadingModal">
-    <div class="custom-modal-card" style="align-items:center; text-align:center; padding:24px;">
-        <div style="font-size:12px; font-weight:800; color:var(--accent);">MENGIMPOR TEMPLATE XML...</div>
-        <div style="font-size:10px; color:var(--text-sub);">Mohon tunggu sebentar, sedang memproses data template...</div>
+        <div class="control-block" id="exportQualityBlock">
+            <div class="label-row"><span>KUALITAS GAMBAR</span><span id="v-export-qual">100%</span></div>
+            <input type="range" id="p-export-qual" min="0.1" max="1" step="0.05" value="1" oninput="document.getElementById('v-export-qual').innerText = Math.round(this.value * 100) + '%'">
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:4px;">
+            <button class="btn-ui" onclick="closeExportModal()">BATAL</button>
+            <button class="btn-ui" style="background:var(--accent); color:#ffffff; border-color:var(--accent);" onclick="processExport()">DOWNLOAD</button>
+        </div>
     </div>
 </div>
 
@@ -1201,12 +1276,21 @@
     </div>
 </div>
 
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <span id="loadingText">MENGIMPOR TEMPLATE XML...</span>
+</div>
+
+<!-- Toast Pesan Notifikasi -->
+<div class="toast-msg" id="toastMsg">Berhasil!</div>
+
 <script>
     const stage = document.getElementById('stage');
     const ctx = stage.getContext('2d', { alpha: true });
     const overlay = document.getElementById('transform-overlay');
-    const workspace = document.getElementById('workspace');
     const stageContainer = document.getElementById('stage-container');
+    const workspace = document.getElementById('workspace');
 
     let layers = [];
     let activeIndex = null;
@@ -1215,12 +1299,20 @@
     let activeTool = 'select';
     let showGrid = false;
 
-    // Viewport Zoom & Pan State
-    let zoomLevel = 1;
-    let panX = 0;
-    let panY = 0;
-    let isPanning = false;
-    let panStart = { x: 0, y: 0 };
+    // Pan, Zoom & Rotation State Workspace Canvas (Support Multi-touch 2 Jari)
+    let workspaceZoom = 1;
+    let workspaceRotation = 0;
+    let workspacePanX = 0, workspacePanY = 0;
+    let isPanningWorkspace = false;
+    let panStartX = 0, panStartY = 0;
+
+    let activePointers = new Map();
+    let initialTouchDist = 0;
+    let initialTouchAngle = 0;
+    let initialTouchZoom = 1;
+    let initialTouchRot = 0;
+    let initialMidX = 0, initialMidY = 0;
+    let initialPanX = 0, initialPanY = 0;
 
     let isMovingObject = false;
     let pointerId = null;
@@ -1233,12 +1325,16 @@
     let cropRotation = 0;
     let cropFlipH = 1;
 
+    window.onload = function() {
+        initEngine();
+    };
+
     function initEngine() {
         createBaseLayer();
         setupInteractionListeners();
         setupWorkspacePanZoom();
-        updateStageFit();
         saveHistoryState();
+        resetWorkspaceFit();
         renderStage();
     }
 
@@ -1256,72 +1352,44 @@
             type: 'raster',
             canvas: baseCanvas,
             x: 0, y: 0, width: stage.width, height: stage.height,
-            scale: 1, rotation: 0, skewX: 0, skewY: 0,
+            scale: 1, rotation: 0, skewX: 0, skewY: 0, perspX: 0, perspY: 0,
             opacity: 1, blendMode: 'source-over',
             visible: true, locked: true, flipH: 1, flipV: 1,
-            outlineColor: '#ffffff', outlineWidth: 0, hasShadow: false,
-            filters: { bright:0, contrast:0, sat:0, blur:0 }
+            filters: { bright:0, contrast:0, sat:0, blur:0 },
+            shadowColor: '#000000', shadowBlur: 0, shadowX: 0, shadowY: 0,
+            outlineColor: '#ffffff', outlineWidth: 0
         };
         layers.push(layer);
         activeIndex = 0;
         rebuildLayerUI();
     }
 
-    function updateStageFit() {
-        const wsRect = workspace.getBoundingClientRect();
-        const maxW = wsRect.width - 40;
-        const maxH = wsRect.height - 40;
-        
-        const scaleW = maxW / stage.width;
-        const scaleH = maxH / stage.height;
-        zoomLevel = Math.min(scaleW, scaleH, 1);
-        panX = 0;
-        panY = 0;
-        applyStageTransform();
+    function updateStageTransform() {
+        stageContainer.style.transform = `translate(${workspacePanX}px, ${workspacePanY}px) rotate(${workspaceRotation}deg) scale(${workspaceZoom})`;
     }
 
-    function applyStageTransform() {
-        stageContainer.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+    function adjustWorkspaceZoom(delta) {
+        workspaceZoom = Math.min(Math.max(0.2, workspaceZoom + delta), 4.0);
+        updateStageTransform();
+    }
+
+    function resetWorkspaceFit() {
+        const rect = workspace.getBoundingClientRect();
+        const scaleX = (rect.width - 40) / stage.width;
+        const scaleY = (rect.height - 40) / stage.height;
+        workspaceZoom = Math.min(scaleX, scaleY, 1.0);
+        workspacePanX = 0;
+        workspacePanY = 0;
+        workspaceRotation = 0;
+        updateStageTransform();
     }
 
     function setupWorkspacePanZoom() {
-        let isSpacePressed = false;
-        window.addEventListener('keydown', (e) => { if (e.code === 'Space') isSpacePressed = true; });
-        window.addEventListener('keyup', (e) => { if (e.code === 'Space') isSpacePressed = false; });
-
         workspace.addEventListener('wheel', (e) => {
             e.preventDefault();
-            const zoomFactor = 1.1;
-            if (e.deltaY < 0) {
-                zoomLevel = Math.min(zoomLevel * zoomFactor, 5);
-            } else {
-                zoomLevel = Math.max(zoomLevel / zoomFactor, 0.2);
-            }
-            applyStageTransform();
+            const zoomDelta = e.deltaY < 0 ? 0.08 : -0.08;
+            adjustWorkspaceZoom(zoomDelta);
         }, { passive: false });
-
-        workspace.addEventListener('pointerdown', (e) => {
-            if (e.button === 1 || isSpacePressed || e.target === workspace || e.target === stageContainer) {
-                isPanning = true;
-                panStart = { x: e.clientX - panX, y: e.clientY - panY };
-                workspace.setPointerCapture(e.pointerId);
-            }
-        });
-
-        workspace.addEventListener('pointermove', (e) => {
-            if (isPanning) {
-                panX = e.clientX - panStart.x;
-                panY = e.clientY - panStart.y;
-                applyStageTransform();
-            }
-        });
-
-        workspace.addEventListener('pointerup', (e) => {
-            if (isPanning) {
-                isPanning = false;
-                try { workspace.releasePointerCapture(e.pointerId); } catch(err) {}
-            }
-        });
     }
 
     function toggleGrid() {
@@ -1332,6 +1400,13 @@
 
     function toggleMenuDrawer() {
         document.getElementById('inspectorContainer').classList.toggle('collapsed');
+    }
+
+    function showToast(text) {
+        const t = document.getElementById('toastMsg');
+        t.innerText = text;
+        t.style.display = 'block';
+        setTimeout(() => { t.style.display = 'none'; }, 2200);
     }
 
     function updateCanvasBg(color) {
@@ -1364,7 +1439,7 @@
             layers[0].height = h;
         }
 
-        updateStageFit();
+        resetWorkspaceFit();
         renderStage();
         saveHistoryState();
     }
@@ -1380,9 +1455,10 @@
             fillColor: document.getElementById('p-shape-fill').value,
             strokeColor: document.getElementById('p-shape-stroke').value,
             strokeWidth: parseFloat(document.getElementById('p-shape-stroke-w').value),
-            outlineColor: '#ffffff', outlineWidth: 0, hasShadow: false,
-            x: 0, y: 0, scale: 1, rotation: 0, skewX: 0, skewY: 0,
-            opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1
+            x: 0, y: 0, scale: 1, rotation: 0, skewX: 0, skewY: 0, perspX: 0, perspY: 0,
+            opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1,
+            shadowColor: '#000000', shadowBlur: 0, shadowX: 0, shadowY: 0,
+            outlineColor: '#ffffff', outlineWidth: 0
         };
         layers.push(layer);
         activeIndex = layers.length - 1;
@@ -1402,14 +1478,15 @@
             fontFamily: 'ImpactCustom',
             fillColor: '#05BDFB',
             strokeColor: '#ffffff',
-            strokeWidth: 2,
+            strokeWidth: 0,
             outlineColor: '#000000',
             outlineWidth: 0,
             align: 'center',
-            is3D: false,
+            is3D: false, color3D: '#000000', depth3D: 8,
             hasShadow: false,
-            x: 0, y: 0, scale: 1, rotation: 0, skewX: 0, skewY: 0,
-            opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1
+            x: 0, y: 0, scale: 1, rotation: 0, skewX: 0, skewY: 0, perspX: 0, perspY: 0,
+            opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1,
+            shadowColor: '#000000', shadowBlur: 0, shadowX: 0, shadowY: 0
         };
         layers.push(layer);
         activeIndex = layers.length - 1;
@@ -1421,11 +1498,10 @@
     function updateRotorTransform() {
         if (activeIndex === null || !layers[activeIndex]) return;
         const l = layers[activeIndex];
+        if (l.locked) return;
 
         l.scale = parseFloat(document.getElementById('p-rotor-scale').value);
         l.rotation = parseFloat(document.getElementById('p-rotor-rot').value);
-        l.skewX = parseFloat(document.getElementById('p-skew-x').value);
-        l.skewY = parseFloat(document.getElementById('p-skew-y').value);
 
         document.getElementById('v-rotor-scale').innerText = l.scale.toFixed(2) + 'x';
         document.getElementById('v-rotor-rot').innerText = l.rotation + '°';
@@ -1433,28 +1509,46 @@
         renderStage();
     }
 
+    function updatePerspectiveTransform() {
+        if (activeIndex === null || !layers[activeIndex]) return;
+        const l = layers[activeIndex];
+        if (l.locked) return;
+
+        l.skewX = parseFloat(document.getElementById('p-skew-x').value);
+        l.skewY = parseFloat(document.getElementById('p-skew-y').value);
+        l.perspX = parseFloat(document.getElementById('p-persp-x').value);
+        l.perspY = parseFloat(document.getElementById('p-persp-y').value);
+
+        renderStage();
+    }
+
     function updateObjectEffects() {
         if (activeIndex === null || !layers[activeIndex]) return;
         const l = layers[activeIndex];
+        if (l.locked) return;
+
+        l.shadowColor = document.getElementById('p-obj-shadow-color').value;
+        l.shadowBlur = parseFloat(document.getElementById('p-obj-shadow-blur').value);
+        l.shadowX = parseFloat(document.getElementById('p-obj-shadow-x').value);
+        l.shadowY = parseFloat(document.getElementById('p-obj-shadow-y').value);
+
         l.outlineColor = document.getElementById('p-obj-outline-color').value;
         l.outlineWidth = parseFloat(document.getElementById('p-obj-outline-w').value);
-        l.hasShadow = document.getElementById('p-obj-shadow').checked;
+
         renderStage();
     }
 
     function fitToCanvasArea() {
         if (activeIndex === null || activeIndex === 0 || !layers[activeIndex]) return;
         const l = layers[activeIndex];
+        if (l.locked) return;
 
         l.x = 0;
         l.y = 0;
         l.rotation = 0;
-        l.skewX = 0;
-        l.skewY = 0;
+        l.skewX = 0; l.skewY = 0; l.perspX = 0; l.perspY = 0;
         document.getElementById('p-rotor-rot').value = 0;
         document.getElementById('v-rotor-rot').innerText = '0°';
-        document.getElementById('p-skew-x').value = 0;
-        document.getElementById('p-skew-y').value = 0;
 
         l.scale = Math.max(stage.width / l.width, stage.height / l.height);
         document.getElementById('p-rotor-scale').value = l.scale;
@@ -1474,8 +1568,33 @@
         };
 
         const handlePointerDown = (e) => {
+            activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+            // Deteksi multi-touch 2 jari pada workspace untuk pan, zoom, & rotasi
+            if (activePointers.size === 2 && e.target.closest('#workspace')) {
+                isPanningWorkspace = false;
+                isMovingObject = false;
+                const pts = Array.from(activePointers.values());
+                initialTouchDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+                initialTouchAngle = Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x);
+                initialTouchZoom = workspaceZoom;
+                initialTouchRot = workspaceRotation;
+                initialMidX = (pts[0].x + pts[1].x) / 2;
+                initialMidY = (pts[0].y + pts[1].y) / 2;
+                initialPanX = workspacePanX;
+                initialPanY = workspacePanY;
+                return;
+            }
+
             const pos = getStagePos(e);
             const target = e.target;
+
+            if (target.id === 'workspace' && activePointers.size === 1) {
+                isPanningWorkspace = true;
+                panStartX = e.clientX - workspacePanX;
+                panStartY = e.clientY - workspacePanY;
+                return;
+            }
 
             if (target.closest('.bbox-move-box') || target.closest('.bbox')) {
                 if (activeIndex === null || !layers[activeIndex] || layers[activeIndex].locked) return;
@@ -1496,7 +1615,8 @@
             let clickedIdx = null;
             for (let i = layers.length - 1; i >= 1; i--) {
                 const l = layers[i];
-                if (!l.visible) continue;
+                // Objek yang digembok (locked) tidak bisa dipencet / dipilih dari canvas
+                if (!l.visible || l.locked) continue;
 
                 const hw = (l.width * l.scale) / 2;
                 const hh = (l.height * l.scale) / 2;
@@ -1534,6 +1654,40 @@
         };
 
         const handlePointerMove = (e) => {
+            if (activePointers.has(e.pointerId)) {
+                activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+            }
+
+            // Aksi Multi-Touch 2 Jari: Zoom, Rotasi & Pan Kanvas
+            if (activePointers.size === 2) {
+                const pts = Array.from(activePointers.values());
+                const currentDist = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y);
+                const currentAngle = Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x);
+                const currentMidX = (pts[0].x + pts[1].x) / 2;
+                const currentMidY = (pts[0].y + pts[1].y) / 2;
+
+                if (initialTouchDist > 0) {
+                    const scaleFactor = currentDist / initialTouchDist;
+                    workspaceZoom = Math.min(Math.max(0.2, initialTouchZoom * scaleFactor), 4.0);
+                }
+
+                const angleDiff = currentAngle - initialTouchAngle;
+                workspaceRotation = initialTouchRot + (angleDiff * 180 / Math.PI);
+
+                workspacePanX = initialPanX + (currentMidX - initialMidX);
+                workspacePanY = initialPanY + (currentMidY - initialMidY);
+
+                updateStageTransform();
+                return;
+            }
+
+            if (isPanningWorkspace && activePointers.size <= 1) {
+                workspacePanX = e.clientX - panStartX;
+                workspacePanY = e.clientY - panStartY;
+                updateStageTransform();
+                return;
+            }
+
             if (!isMovingObject || activeIndex === null || !layers[activeIndex]) return;
             if (e.pointerId !== pointerId) return;
 
@@ -1553,6 +1707,15 @@
         };
 
         const handlePointerUp = (e) => {
+            activePointers.delete(e.pointerId);
+            if (activePointers.size < 2) {
+                initialTouchDist = 0;
+            }
+
+            if (isPanningWorkspace && activePointers.size === 0) {
+                isPanningWorkspace = false;
+            }
+
             if (isMovingObject && (pointerId === null || e.pointerId === pointerId)) {
                 isMovingObject = false;
                 pointerId = null;
@@ -1579,30 +1742,40 @@
 
             ctx.translate(stage.width / 2 + layer.x, stage.height / 2 + layer.y);
             ctx.rotate((layer.rotation * Math.PI) / 180);
-            
-            // Perspekstif / Skew Matrix Transformation
-            if (layer.skewX || layer.skewY) {
-                ctx.transform(1, layer.skewY * 0.01, layer.skewX * 0.01, 1, 0, 0);
+
+            if (layer.skewX || layer.skewY || layer.perspX || layer.perspY) {
+                const sx = (layer.skewX || 0) * Math.PI / 180;
+                const sy = (layer.skewY || 0) * Math.PI / 180;
+                const px = (layer.perspX || 0) / 1000;
+                const py = (layer.perspY || 0) / 1000;
+                ctx.transform(1 + px, Math.tan(sy), Math.tan(sx), 1 + py, 0, 0);
             }
 
             ctx.scale(layer.scale * layer.flipH, layer.scale * layer.flipV);
 
-            // Efek Bayangan Universal
-            if (layer.hasShadow) {
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-                ctx.shadowBlur = 12;
-                ctx.shadowOffsetX = 6;
-                ctx.shadowOffsetY = 6;
+            if (layer.shadowBlur > 0 || layer.shadowX !== 0 || layer.shadowY !== 0) {
+                ctx.shadowColor = layer.shadowColor || '#000000';
+                ctx.shadowBlur = layer.shadowBlur || 0;
+                ctx.shadowOffsetX = layer.shadowX || 0;
+                ctx.shadowOffsetY = layer.shadowY || 0;
+            } else {
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
             }
 
             if (layer.type === 'raster') {
                 const filtered = applyFilters(layer);
-                if (layer.outlineWidth > 0) {
+                
+                if (layer.outlineWidth && layer.outlineWidth > 0) {
                     ctx.save();
-                    ctx.filter = `drop-shadow(0 0 ${layer.outlineWidth}px ${layer.outlineColor})`;
-                    ctx.drawImage(filtered, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
+                    ctx.strokeStyle = layer.outlineColor || '#ffffff';
+                    ctx.lineWidth = layer.outlineWidth;
+                    ctx.strokeRect(-layer.width / 2, -layer.height / 2, layer.width, layer.height);
                     ctx.restore();
                 }
+
                 ctx.drawImage(filtered, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
             } else if (layer.type === 'text') {
                 renderTextNode(ctx, layer);
@@ -1655,12 +1828,15 @@
         }
 
         if (l.fillColor) { targetCtx.fillStyle = l.fillColor; targetCtx.fill(); }
-        if (l.outlineWidth > 0) {
-            targetCtx.strokeStyle = l.outlineColor;
-            targetCtx.lineWidth = l.outlineWidth;
+
+        const effectiveStrokeW = (l.outlineWidth && l.outlineWidth > 0) ? l.outlineWidth : l.strokeWidth;
+        const effectiveStrokeColor = (l.outlineWidth && l.outlineWidth > 0) ? l.outlineColor : l.strokeColor;
+
+        if (effectiveStrokeW > 0) {
+            targetCtx.strokeStyle = effectiveStrokeColor;
+            targetCtx.lineWidth = effectiveStrokeW;
             targetCtx.stroke();
         }
-        if (l.strokeWidth > 0) { targetCtx.strokeStyle = l.strokeColor; targetCtx.lineWidth = l.strokeWidth; targetCtx.stroke(); }
     }
 
     function renderTextNode(targetCtx, l) {
@@ -1678,6 +1854,34 @@
         const totalHeight = lines.length * lineHeight;
         const startY = -(totalHeight / 2) + (lineHeight / 2);
 
+        if (l.is3D) {
+            const depth = l.depth3D || 8;
+            const shadowColor3D = l.color3D || '#000000';
+            targetCtx.save();
+            targetCtx.fillStyle = shadowColor3D;
+            
+            for (let d = depth; d >= 1; d--) {
+                lines.forEach((line, index) => {
+                    const currentY = startY + (index * lineHeight) + d;
+                    let drawX = d;
+                    if (align === 'left') drawX = -maxLineWidth / 2 + d;
+                    else if (align === 'right') drawX = maxLineWidth / 2 + d;
+
+                    targetCtx.textAlign = align === 'justify' ? 'center' : align;
+                    targetCtx.textBaseline = 'middle';
+                    targetCtx.fillText(line, drawX, currentY);
+                });
+            }
+            targetCtx.restore();
+        }
+
+        if (l.hasShadow) {
+            targetCtx.shadowColor = l.shadowColor || 'rgba(0, 0, 0, 0.7)';
+            targetCtx.shadowBlur = l.shadowBlur || 10;
+            targetCtx.shadowOffsetX = l.shadowX || 4;
+            targetCtx.shadowOffsetY = l.shadowY || 4;
+        }
+
         lines.forEach((line, index) => {
             const currentY = startY + (index * lineHeight);
             let drawX = 0;
@@ -1687,17 +1891,12 @@
             targetCtx.textAlign = align === 'justify' ? 'center' : align;
             targetCtx.textBaseline = 'middle';
 
-            // Efek 3D Teks
-            if (l.is3D) {
-                targetCtx.fillStyle = '#005588';
-                for (let d = 1; d <= 4; d++) {
-                    targetCtx.fillText(line, drawX + d, currentY + d);
-                }
-            }
+            const effectiveOutlineW = l.outlineWidth || l.strokeWidth || 0;
+            const effectiveOutlineColor = l.outlineColor || l.strokeColor || '#000000';
 
-            if (l.outlineWidth && l.outlineWidth > 0) {
-                targetCtx.lineWidth = l.outlineWidth;
-                targetCtx.strokeStyle = l.outlineColor || '#000000';
+            if (effectiveOutlineW > 0) {
+                targetCtx.lineWidth = effectiveOutlineW;
+                targetCtx.strokeStyle = effectiveOutlineColor;
                 targetCtx.strokeText(line, drawX, currentY);
             }
 
@@ -1735,14 +1934,13 @@
         if (activeIndex === null || activeIndex === 0 || !layers[activeIndex]) return;
 
         const l = layers[activeIndex];
-        const rect = stage.getBoundingClientRect();
-        const scaleX = rect.width / stage.width;
-        const scaleY = rect.height / stage.height;
+        // Jika objek terkunci, jangan tampilkan bounding box interaktif di canvas
+        if (l.locked) return;
 
-        const w = (l.width || 100) * l.scale * scaleX;
-        const h = (l.height || 100) * l.scale * scaleY;
-        const cx = (stage.width / 2 + l.x) * scaleX;
-        const cy = (stage.height / 2 + l.y) * scaleY;
+        const w = (l.width || 100) * l.scale;
+        const h = (l.height || 100) * l.scale;
+        const cx = stage.width / 2 + l.x;
+        const cy = stage.height / 2 + l.y;
 
         const box = document.createElement('div');
         box.className = 'bbox';
@@ -1750,7 +1948,7 @@
         box.style.height = h + 'px';
         box.style.left = (cx - w / 2) + 'px';
         box.style.top = (cy - h / 2) + 'px';
-        box.style.transform = `rotate(${l.rotation}deg) skew(${l.skewX || 0}deg, ${l.skewY || 0}deg)`;
+        box.style.transform = `rotate(${l.rotation}deg)`;
 
         const delBtn = document.createElement('div');
         delBtn.className = 'bbox-handle-delete';
@@ -1771,7 +1969,7 @@
 
         const moveBox = document.createElement('div');
         moveBox.className = 'bbox-move-box';
-        moveBox.innerText = 'GESER POSISI';
+        moveBox.innerText = l.locked ? 'LOCKED' : 'GESER POSISI';
 
         box.appendChild(delBtn);
         box.appendChild(lockBtn);
@@ -1816,7 +2014,7 @@
     function updateShapeProps() {
         if (activeIndex === null || !layers[activeIndex]) return;
         const l = layers[activeIndex];
-        if (l.type !== 'shape') return;
+        if (l.type !== 'shape' || l.locked) return;
 
         l.fillColor = document.getElementById('p-shape-fill').value;
         l.strokeColor = document.getElementById('p-shape-stroke').value;
@@ -1833,7 +2031,7 @@
     function applyPipeline() {
         if (activeIndex === null || !layers[activeIndex]) return;
         const l = layers[activeIndex];
-        if (l.type !== 'raster') return;
+        if (l.type !== 'raster' || l.locked) return;
 
         l.filters.bright = document.getElementById('p-bright').value;
         l.filters.contrast = document.getElementById('p-contrast').value;
@@ -1846,7 +2044,7 @@
     function updateTextProps() {
         if (activeIndex === null || !layers[activeIndex]) return;
         const l = layers[activeIndex];
-        if (l.type !== 'text') return;
+        if (l.type !== 'text' || l.locked) return;
 
         l.text = document.getElementById('p-text-str').value;
         l.fontFamily = document.getElementById('p-font-family').value;
@@ -1855,6 +2053,8 @@
         l.outlineWidth = parseFloat(document.getElementById('p-text-outline-w').value);
         l.align = document.getElementById('p-text-align').value;
         l.is3D = document.getElementById('p-text-3d').checked;
+        l.color3D = document.getElementById('p-text-3d-color').value;
+        l.depth3D = parseFloat(document.getElementById('p-text-3d-depth').value);
         l.hasShadow = document.getElementById('p-text-shadow').checked;
         renderStage();
     }
@@ -1862,6 +2062,7 @@
     function updateBlendProps() {
         if (activeIndex === null || !layers[activeIndex]) return;
         const l = layers[activeIndex];
+        if (l.locked) return;
         l.blendMode = document.getElementById('p-blend-mode').value;
         l.opacity = parseFloat(document.getElementById('p-layer-opacity').value);
         renderStage();
@@ -1870,6 +2071,7 @@
     function flipLayer(axis) {
         if (activeIndex === null || !layers[activeIndex]) return;
         const l = layers[activeIndex];
+        if (l.locked) return;
         if (axis === 'h') l.flipH *= -1;
         if (axis === 'v') l.flipV *= -1;
         renderStage();
@@ -1943,25 +2145,35 @@
         activeIndex = idx;
         rebuildLayerUI();
         if (layers[idx]) {
-            document.getElementById('p-rotor-scale').value = layers[idx].scale || 1;
-            document.getElementById('v-rotor-scale').innerText = (layers[idx].scale || 1).toFixed(2) + 'x';
+            const l = layers[idx];
+            document.getElementById('p-rotor-scale').value = l.scale || 1;
+            document.getElementById('v-rotor-scale').innerText = (l.scale || 1).toFixed(2) + 'x';
 
-            document.getElementById('p-rotor-rot').value = layers[idx].rotation || 0;
-            document.getElementById('v-rotor-rot').innerText = (layers[idx].rotation || 0) + '°';
-            document.getElementById('p-skew-x').value = layers[idx].skewX || 0;
-            document.getElementById('p-skew-y').value = layers[idx].skewY || 0;
+            document.getElementById('p-rotor-rot').value = l.rotation || 0;
+            document.getElementById('v-rotor-rot').innerText = (l.rotation || 0) + '°';
 
-            if (layers[idx].type === 'text') {
-                document.getElementById('p-text-str').value = layers[idx].text || '';
-                if (layers[idx].align) document.getElementById('p-text-align').value = layers[idx].align;
-                if (layers[idx].outlineWidth !== undefined) {
-                    document.getElementById('p-text-outline-w').value = layers[idx].outlineWidth;
-                }
-                if (layers[idx].outlineColor) {
-                    document.getElementById('p-text-outline-color').value = layers[idx].outlineColor;
-                }
-                document.getElementById('p-text-3d').checked = !!layers[idx].is3D;
-                document.getElementById('p-text-shadow').checked = !!layers[idx].hasShadow;
+            document.getElementById('p-skew-x').value = l.skewX || 0;
+            document.getElementById('p-skew-y').value = l.skewY || 0;
+            document.getElementById('p-persp-x').value = l.perspX || 0;
+            document.getElementById('p-persp-y').value = l.perspY || 0;
+
+            document.getElementById('p-obj-shadow-color').value = l.shadowColor || '#000000';
+            document.getElementById('p-obj-shadow-blur').value = l.shadowBlur || 0;
+            document.getElementById('p-obj-shadow-x').value = l.shadowX || 0;
+            document.getElementById('p-obj-shadow-y').value = l.shadowY || 0;
+
+            document.getElementById('p-obj-outline-color').value = l.outlineColor || '#ffffff';
+            document.getElementById('p-obj-outline-w').value = l.outlineWidth || 0;
+
+            if (l.type === 'text') {
+                document.getElementById('p-text-str').value = l.text || '';
+                if (l.align) document.getElementById('p-text-align').value = l.align;
+                if (l.outlineWidth !== undefined) document.getElementById('p-text-outline-w').value = l.outlineWidth;
+                if (l.outlineColor) document.getElementById('p-text-outline-color').value = l.outlineColor;
+                document.getElementById('p-text-3d').checked = !!l.is3D;
+                if (l.color3D) document.getElementById('p-text-3d-color').value = l.color3D;
+                if (l.depth3D) document.getElementById('p-text-3d-depth').value = l.depth3D;
+                document.getElementById('p-text-shadow').checked = !!l.hasShadow;
             }
         }
         renderStage();
@@ -2000,14 +2212,15 @@
         newLayer.id = 'layer_' + Date.now();
         newLayer.name = l.name + ' Copy';
         newLayer.canvas = dupCanvas;
-        newLayer.x += 15;
-        newLayer.y += 15;
+        newLayer.x += 20;
+        newLayer.y += 20;
 
         layers.push(newLayer);
         activeIndex = layers.length - 1;
         rebuildLayerUI();
         renderStage();
         saveHistoryState();
+        showToast("Objek Diduplikasi!");
     }
 
     function saveHistoryState() {
@@ -2055,10 +2268,21 @@
         renderStage();
     }
 
-    function openCropModal(e, replace = false) {
+    function openCropModal(e) {
+        isReplacingPhoto = false;
+        processImageCropModal(e);
+        e.target.value = '';
+    }
+
+    function replaceActivePhoto(e) {
+        isReplacingPhoto = true;
+        processImageCropModal(e);
+        e.target.value = '';
+    }
+
+    function processImageCropModal(e) {
         const file = e.target.files[0];
         if (!file) return;
-        isReplacingPhoto = replace;
 
         const reader = new FileReader();
         reader.onload = (evt) => {
@@ -2236,10 +2460,29 @@
             0, 0, cropBoxState.w, cropBoxState.h
         );
 
-        if (isReplacingPhoto && activeIndex !== null && layers[activeIndex] && layers[activeIndex].type === 'raster') {
-            layers[activeIndex].canvas = croppedCanvas;
-            layers[activeIndex].width = cropBoxState.w;
-            layers[activeIndex].height = cropBoxState.h;
+        if (isReplacingPhoto) {
+            if (activeIndex === null || activeIndex === 0 || !layers[activeIndex] || layers[activeIndex].type !== 'raster') {
+                let foundIdx = -1;
+                for (let i = layers.length - 1; i > 0; i--) {
+                    if (layers[i].type === 'raster') {
+                        foundIdx = i;
+                        break;
+                    }
+                }
+                if (foundIdx !== -1) {
+                    activeIndex = foundIdx;
+                } else {
+                    isReplacingPhoto = false;
+                }
+            }
+        }
+
+        if (isReplacingPhoto && activeIndex !== null && activeIndex > 0 && layers[activeIndex] && layers[activeIndex].type === 'raster') {
+            const targetLayer = layers[activeIndex];
+            targetLayer.canvas = croppedCanvas;
+            targetLayer.width = cropBoxState.w;
+            targetLayer.height = cropBoxState.h;
+            showToast("Foto Berhasil Diganti!");
         } else {
             const layer = {
                 id: 'img_' + Date.now(),
@@ -2248,15 +2491,18 @@
                 canvas: croppedCanvas,
                 width: cropBoxState.w, height: cropBoxState.h,
                 x: 0, y: 0, scale: Math.min(stage.width / cropBoxState.w, stage.height / cropBoxState.h) * 0.8,
-                rotation: 0, skewX: 0, skewY: 0,
+                rotation: 0, skewX: 0, skewY: 0, perspX: 0, perspY: 0,
                 opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1,
-                outlineColor: '#ffffff', outlineWidth: 0, hasShadow: false,
-                filters: { bright:0, contrast:0, sat:0, blur:0 }
+                filters: { bright:0, contrast:0, sat:0, blur:0 },
+                shadowColor: '#000000', shadowBlur: 0, shadowX: 0, shadowY: 0,
+                outlineColor: '#ffffff', outlineWidth: 0
             };
             layers.push(layer);
             activeIndex = layers.length - 1;
+            showToast("Foto Berhasil Ditambahkan!");
         }
 
+        isReplacingPhoto = false;
         rebuildLayerUI();
         renderStage();
         saveHistoryState();
@@ -2300,7 +2546,6 @@
         element.classList.add('active');
     }
 
-    // Modal Export CSS Buatan
     function openExportModal() {
         document.getElementById('exportModal').classList.add('open');
     }
@@ -2309,162 +2554,187 @@
         document.getElementById('exportModal').classList.remove('open');
     }
 
-    function executeExport() {
-        const format = document.getElementById('export-format').value;
-        const quality = parseFloat(document.getElementById('p-export-quality').value) / 100;
-        closeExportModal();
-
-        if (format === 'xml') {
-            generateXMLTemplate();
-        } else {
-            const link = document.createElement('a');
-            link.download = `MYshoot_Export_${Date.now()}.${format === 'image/jpeg' ? 'jpg' : 'png'}`;
-            link.href = stage.toDataURL(format, quality);
-            link.click();
-        }
+    function toggleExportQualityInput() {
+        const fmt = document.getElementById('exportFormat').value;
+        const qualBlock = document.getElementById('exportQualityBlock');
+        qualBlock.style.display = (fmt === 'jpeg' || fmt === 'webp') ? 'flex' : 'none';
     }
 
-    // Primadona: Export XML & Import XML Template
-    function generateXMLTemplate() {
-        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<MYshootTemplate version="1.0" width="${stage.width}" height="${stage.height}">\n`;
-        layers.forEach((l, idx) => {
-            xml += `  <Layer id="${l.id}" name="${l.name}" type="${l.type}" x="${l.x}" y="${l.y}" scale="${l.scale}" rotation="${l.rotation}" opacity="${l.opacity}" blendMode="${l.blendMode}">\n`;
+    function processExport() {
+        const fmt = document.getElementById('exportFormat').value;
+        const qual = parseFloat(document.getElementById('p-export-qual').value);
+
+        if (fmt === 'xml') {
+            exportToXML();
+        } else {
+            const mime = fmt === 'png' ? 'image/png' : (fmt === 'jpeg' ? 'image/jpeg' : 'image/webp');
+            const link = document.createElement('a');
+            link.download = `MYshoot_Export_${Date.now()}.${fmt === 'jpeg' ? 'jpg' : fmt}`;
+            link.href = stage.toDataURL(mime, qual);
+            link.click();
+            showToast("Export Berhasil!");
+        }
+        closeExportModal();
+    }
+
+    function escapeXml(str) {
+        return (str || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function exportToXML() {
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+        const bgColor = document.getElementById('p-bg-color').value || '#ffffff';
+        xml += `<myshoot_template width="${stage.width}" height="${stage.height}" bg="${bgColor}">\n`;
+        
+        layers.forEach(l => {
+            xml += `  <layer id="${escapeXml(l.id)}" name="${escapeXml(l.name)}" type="${escapeXml(l.type)}" x="${l.x}" y="${l.y}" scale="${l.scale}" rotation="${l.rotation}" opacity="${l.opacity}" blendMode="${escapeXml(l.blendMode)}" visible="${l.visible}" locked="${l.locked}" flipH="${l.flipH}" flipV="${l.flipV}" skewX="${l.skewX || 0}" skewY="${l.skewY || 0}" perspX="${l.perspX || 0}" perspY="${l.perspY || 0}" shadowColor="${escapeXml(l.shadowColor || '#000000')}" shadowBlur="${l.shadowBlur || 0}" shadowX="${l.shadowX || 0}" shadowY="${l.shadowY || 0}" outlineColor="${escapeXml(l.outlineColor || '#ffffff')}" outlineWidth="${l.outlineWidth || 0}" width="${l.width || 0}" height="${l.height || 0}">\n`;
+            
             if (l.type === 'text') {
-                xml += `    <Text content="${encodeURIComponent(l.text)}" fontSize="${l.fontSize}" fontFamily="${l.fontFamily}" fillColor="${l.fillColor}" align="${l.align}" is3D="${l.is3D}" hasShadow="${l.hasShadow}"/>\n`;
+                xml += `    <text>${escapeXml(l.text || '')}</text>\n`;
+                xml += `    <fontFamily>${escapeXml(l.fontFamily || 'ImpactCustom')}</fontFamily>\n`;
+                xml += `    <fontSize>${l.fontSize || 60}</fontSize>\n`;
+                xml += `    <fillColor>${escapeXml(l.fillColor || '#05BDFB')}</fillColor>\n`;
+                xml += `    <align>${escapeXml(l.align || 'center')}</align>\n`;
+                xml += `    <is3D>${l.is3D || false}</is3D>\n`;
+                xml += `    <color3D>${escapeXml(l.color3D || '#000000')}</color3D>\n`;
+                xml += `    <depth3D>${l.depth3D || 8}</depth3D>\n`;
+                xml += `    <hasShadow>${l.hasShadow || false}</hasShadow>\n`;
             } else if (l.type === 'shape') {
-                xml += `    <Shape shapeType="${l.shapeType}" width="${l.width}" height="${l.height}" fillColor="${l.fillColor}" strokeColor="${l.strokeColor}" strokeWidth="${l.strokeWidth}"/>\n`;
-            } else if (l.type === 'raster' && idx > 0) {
-                xml += `    <Raster imgData="${l.canvas.toDataURL()}"/>\n`;
+                xml += `    <shapeType>${escapeXml(l.shapeType || 'rect')}</shapeType>\n`;
+                xml += `    <fillColor>${escapeXml(l.fillColor || '#05BDFB')}</fillColor>\n`;
+                xml += `    <strokeColor>${escapeXml(l.strokeColor || '#0f172a')}</strokeColor>\n`;
+                xml += `    <strokeWidth>${l.strokeWidth || 2}</strokeWidth>\n`;
+            } else if (l.type === 'raster' && l.id !== 'layer_base') {
+                xml += `    <imgData>${l.canvas ? l.canvas.toDataURL() : ''}</imgData>\n`;
             }
-            xml += `  </Layer>\n`;
+            xml += `  </layer>\n`;
         });
-        xml += `</MYshootTemplate>`;
+        xml += `</myshoot_template>`;
 
         const blob = new Blob([xml], { type: 'application/xml' });
-        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.download = `MYshoot_Template_${Date.now()}.xml`;
-        link.href = url;
+        link.href = URL.createObjectURL(blob);
         link.click();
-        URL.revokeObjectURL(url);
-    }
-
-    function triggerImportXML() {
-        document.getElementById('xmlFileLoader').click();
+        showToast("Export XML Berhasil!");
     }
 
     function importXMLTemplate(e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        const loadingModal = document.getElementById('loadingModal');
-        loadingModal.classList.add('open');
-
+        document.getElementById('loadingOverlay').classList.add('open');
         const reader = new FileReader();
         reader.onload = (evt) => {
             try {
                 const parser = new DOMParser();
                 const xmlDoc = parser.parseFromString(evt.target.result, "text/xml");
-                const root = xmlDoc.getElementsByTagName('MYshootTemplate')[0];
+                
+                const root = xmlDoc.getElementsByTagName('myshoot_template')[0];
                 if (!root) throw new Error("Format XML tidak valid");
 
                 const w = parseInt(root.getAttribute('width')) || 720;
                 const h = parseInt(root.getAttribute('height')) || 1280;
-                setCanvasPreset(w, h);
+                const bg = root.getAttribute('bg') || '#ffffff';
 
-                layers = [];
-                const layerNodes = xmlDoc.getElementsByTagName('Layer');
-                
-                for (let node of layerNodes) {
-                    const lType = node.getAttribute('type');
-                    const lId = node.getAttribute('id');
-                    const lName = node.getAttribute('name');
+                stage.width = w;
+                stage.height = h;
+                document.getElementById('p-bg-color').value = bg;
+
+                const layerNodes = xmlDoc.getElementsByTagName('layer');
+                let newLayers = [];
+
+                for (let i = 0; i < layerNodes.length; i++) {
+                    const node = layerNodes[i];
+                    const type = node.getAttribute('type');
+                    const id = node.getAttribute('id');
+                    const name = node.getAttribute('name');
                     const x = parseFloat(node.getAttribute('x')) || 0;
                     const y = parseFloat(node.getAttribute('y')) || 0;
                     const scale = parseFloat(node.getAttribute('scale')) || 1;
                     const rotation = parseFloat(node.getAttribute('rotation')) || 0;
                     const opacity = parseFloat(node.getAttribute('opacity')) || 1;
                     const blendMode = node.getAttribute('blendMode') || 'source-over';
+                    const visible = node.getAttribute('visible') !== 'false';
+                    const locked = node.getAttribute('locked') === 'true';
+                    const flipH = parseFloat(node.getAttribute('flipH')) || 1;
+                    const flipV = parseFloat(node.getAttribute('flipV')) || 1;
+                    const skewX = parseFloat(node.getAttribute('skewX')) || 0;
+                    const skewY = parseFloat(node.getAttribute('skewY')) || 0;
+                    const perspX = parseFloat(node.getAttribute('perspX')) || 0;
+                    const perspY = parseFloat(node.getAttribute('perspY')) || 0;
+                    const shadowColor = node.getAttribute('shadowColor') || '#000000';
+                    const shadowBlur = parseFloat(node.getAttribute('shadowBlur')) || 0;
+                    const shadowX = parseFloat(node.getAttribute('shadowX')) || 0;
+                    const shadowY = parseFloat(node.getAttribute('shadowY')) || 0;
+                    const outlineColor = node.getAttribute('outlineColor') || '#ffffff';
+                    const outlineWidth = parseFloat(node.getAttribute('outlineWidth')) || 0;
+                    const width = parseFloat(node.getAttribute('width')) || w;
+                    const height = parseFloat(node.getAttribute('height')) || h;
 
-                    if (lId === 'layer_base') {
-                        createBaseLayer();
-                        continue;
-                    }
+                    const baseObj = {
+                        id, name, type, x, y, scale, rotation, opacity, blendMode, visible, locked,
+                        flipH, flipV, skewX, skewY, perspX, perspY,
+                        shadowColor, shadowBlur, shadowX, shadowY, outlineColor, outlineWidth, width, height
+                    };
 
-                    if (lType === 'text') {
-                        const tNode = node.getElementsByTagName('Text')[0];
-                        const layer = {
-                            id: lId, name: lName, type: 'text',
-                            text: decodeURIComponent(tNode.getAttribute('content')),
-                            fontSize: parseFloat(tNode.getAttribute('fontSize')),
-                            fontFamily: tNode.getAttribute('fontFamily'),
-                            fillColor: tNode.getAttribute('fillColor'),
-                            align: tNode.getAttribute('align'),
-                            is3D: tNode.getAttribute('is3D') === 'true',
-                            hasShadow: tNode.getAttribute('hasShadow') === 'true',
-                            x, y, scale, rotation, opacity, blendMode,
-                            width: 200, height: 60, visible: true, locked: false, flipH: 1, flipV: 1,
-                            outlineColor: '#000000', outlineWidth: 0, filters: { bright:0, contrast:0, sat:0, blur:0 }
-                        };
-                        layers.push(layer);
-                    } else if (lType === 'shape') {
-                        const sNode = node.getElementsByTagName('Shape')[0];
-                        const layer = {
-                            id: lId, name: lName, type: 'shape',
-                            shapeType: sNode.getAttribute('shapeType'),
-                            width: parseFloat(sNode.getAttribute('width')),
-                            height: parseFloat(sNode.getAttribute('height')),
-                            fillColor: sNode.getAttribute('fillColor'),
-                            strokeColor: sNode.getAttribute('strokeColor'),
-                            strokeWidth: parseFloat(sNode.getAttribute('strokeWidth')),
-                            x, y, scale, rotation, opacity, blendMode,
-                            visible: true, locked: false, flipH: 1, flipV: 1,
-                            outlineColor: '#ffffff', outlineWidth: 0, hasShadow: false
-                        };
-                        layers.push(layer);
-                    } else if (lType === 'raster') {
-                        const rNode = node.getElementsByTagName('Raster')[0];
-                        const imgData = rNode.getAttribute('imgData');
-                        const img = new Image();
-                        img.src = imgData;
-                        const rCanvas = document.createElement('canvas');
-                        
-                        img.onload = () => {
-                            rCanvas.width = img.width;
-                            rCanvas.height = img.height;
-                            rCanvas.getContext('2d').drawImage(img, 0, 0);
-                            renderStage();
-                        };
+                    if (type === 'text') {
+                        baseObj.text = node.getElementsByTagName('text')[0]?.textContent || '';
+                        baseObj.fontFamily = node.getElementsByTagName('fontFamily')[0]?.textContent || 'ImpactCustom';
+                        baseObj.fontSize = parseFloat(node.getElementsByTagName('fontSize')[0]?.textContent) || 60;
+                        baseObj.fillColor = node.getElementsByTagName('fillColor')[0]?.textContent || '#05BDFB';
+                        baseObj.align = node.getElementsByTagName('align')[0]?.textContent || 'center';
+                        baseObj.is3D = node.getElementsByTagName('is3D')[0]?.textContent === 'true';
+                        baseObj.color3D = node.getElementsByTagName('color3D')[0]?.textContent || '#000000';
+                        baseObj.depth3D = parseFloat(node.getElementsByTagName('depth3D')[0]?.textContent) || 8;
+                        baseObj.hasShadow = node.getElementsByTagName('hasShadow')[0]?.textContent === 'true';
+                        newLayers.push(baseObj);
+                    } else if (type === 'shape') {
+                        baseObj.shapeType = node.getElementsByTagName('shapeType')[0]?.textContent || 'rect';
+                        baseObj.fillColor = node.getElementsByTagName('fillColor')[0]?.textContent || '#05BDFB';
+                        baseObj.strokeColor = node.getElementsByTagName('strokeColor')[0]?.textContent || '#0f172a';
+                        baseObj.strokeWidth = parseFloat(node.getElementsByTagName('strokeWidth')[0]?.textContent) || 2;
+                        newLayers.push(baseObj);
+                    } else if (type === 'raster') {
+                        const imgData = node.getElementsByTagName('imgData')[0]?.textContent || '';
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        baseObj.filters = { bright:0, contrast:0, sat:0, blur:0 };
 
-                        const layer = {
-                            id: lId, name: lName, type: 'raster',
-                            canvas: rCanvas, width: 300, height: 300,
-                            x, y, scale, rotation, opacity, blendMode,
-                            visible: true, locked: false, flipH: 1, flipV: 1,
-                            outlineColor: '#ffffff', outlineWidth: 0, hasShadow: false,
-                            filters: { bright:0, contrast:0, sat:0, blur:0 }
-                        };
-                        layers.push(layer);
+                        if (imgData) {
+                            const img = new Image();
+                            img.onload = () => {
+                                canvas.getContext('2d').drawImage(img, 0, 0);
+                                renderStage();
+                            };
+                            img.src = imgData;
+                        } else if (id === 'layer_base') {
+                            canvas.getContext('2d').fillStyle = bg;
+                            canvas.getContext('2d').fillRect(0, 0, width, height);
+                        }
+                        baseObj.canvas = canvas;
+                        newLayers.push(baseObj);
                     }
                 }
 
-                setTimeout(() => {
-                    loadingModal.classList.remove('open');
-                    activeIndex = layers.length - 1;
-                    rebuildLayerUI();
-                    renderStage();
-                    saveHistoryState();
-                }, 800);
-
-            } catch (err) {
-                loadingModal.classList.remove('open');
-                alert("Gagal mengimpor file XML template: " + err.message);
+                layers = newLayers;
+                activeIndex = layers.length > 1 ? 1 : 0;
+                rebuildLayerUI();
+                resetWorkspaceFit();
+                renderStage();
+                saveHistoryState();
+                showToast("Template XML Berhasil Diimport!");
+            } catch(err) {
+                console.error(err);
+                alert("Gagal membaca file XML template.");
+            } finally {
+                document.getElementById('loadingOverlay').classList.remove('open');
             }
         };
         reader.readAsText(file);
+        e.target.value = '';
     }
-
-    initEngine();
 </script>
 </body>
 </html>
