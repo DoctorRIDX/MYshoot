@@ -75,20 +75,34 @@
             align-items: center;
             justify-content: center;
             line-height: 1;
+            margin-top: -5px;
         }
 
         .brand-logo {
-            height: 100px;
-            max-width: 920px;
+            height: 52px;
+            max-width: 200px;
             object-fit: contain;
         }
 
         .brand-subtext {
             font-family: 'ImpactCustom', Impact, sans-serif;
-            font-size: 19px;
-            letter-spacing: 2px;
+            font-size: 16px;
+            letter-spacing: 1.5px;
             color: #05BDFB;
-            margin-top: -30px;
+            margin-top: 2px;
+        }
+
+        .brand-link {
+            font-size: 8px;
+            color: var(--text-sub);
+            text-decoration: none;
+            margin-top: 2px;
+            transition: color 0.15s;
+        }
+
+        .brand-link:hover {
+            color: var(--accent);
+            text-decoration: underline;
         }
 
         .icon-btn {
@@ -126,7 +140,7 @@
             flex-shrink: 0;
         }
 
-        /* Workspace Canvas Area */
+        /* Workspace Canvas Area dengan Panning & Zooming */
         .workspace {
             flex: 1;
             position: relative;
@@ -135,16 +149,17 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            padding: 10px;
             touch-action: none;
         }
 
         #stage-container {
-            position: relative;
+            position: absolute;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 20px rgba(5, 189, 251, 0.15);
+            transform-origin: center center;
+            will-change: transform;
         }
 
         #stage {
@@ -156,9 +171,8 @@
             background-size: 16px 16px;
             background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
             border-radius: 4px;
-            max-width: 100%;
-            max-height: 100%;
             background-color: #ffffff;
+            display: block;
         }
 
         #transform-overlay {
@@ -578,6 +592,41 @@
             stroke-width: 2;
         }
 
+        /* Modal Custom CSS Buatan (Export & Import XML) */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 400;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .custom-modal-overlay.open { display: flex; }
+
+        .custom-modal-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            width: 90%;
+            max-width: 340px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .custom-modal-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
         /* Modal Crop Gambar */
         .modal-overlay {
             position: fixed;
@@ -742,10 +791,11 @@
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
         </button>
         
-        <!-- Logo & Subtitle -->
+        <!-- Logo & Subtitle & Link Saweria -->
         <div class="brand-container">
             <img src="logo.png" alt="MYshoot Logo" class="brand-logo" />
             <span class="brand-subtext">MYshoot EDITOR</span>
+            <a href="https://saweria.co/kepalabug" target="_blank" class="brand-link">https://saweria.co/kepalabug</a>
         </div>
 
         <div style="display:flex; gap:4px;">
@@ -755,11 +805,11 @@
             <button class="icon-btn" onclick="redo()" title="Redo">
                 <svg viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
             </button>
-            <button class="btn-ui" style="background:var(--accent); color:#ffffff; border-color:var(--accent);" onclick="exportCanvas()">EXPORT</button>
+            <button class="btn-ui" style="background:var(--accent); color:#ffffff; border-color:var(--accent);" onclick="openExportModal()">EXPORT</button>
         </div>
     </div>
 
-    <!-- Workspace Area -->
+    <!-- Workspace Area (Zoom, Pan & Canvas Container) -->
     <div class="workspace" id="workspace">
         <div id="stage-container">
             <canvas id="stage" width="720" height="1280"></canvas>
@@ -826,6 +876,11 @@
                         <button class="btn-ui" onclick="updateCanvasBg('transparent')">TRANSPARAN</button>
                     </div>
                 </div>
+                <div class="control-block">
+                    <div class="label-row"><span>IMPORT TEMPLATE XML</span></div>
+                    <button class="btn-ui" style="background:var(--accent); color:#fff; border-color:var(--accent);" onclick="triggerImportXML()">PILIH FILE XML TEMPLATE</button>
+                    <input type="file" id="xmlFileLoader" accept=".xml" style="display:none;" onchange="importXMLTemplate(event)">
+                </div>
             </div>
 
             <!-- CORE ADJUSTMENTS -->
@@ -852,7 +907,7 @@
                 </div>
             </div>
 
-            <!-- TRANSFORM DENGAN ROTOR UKURAN & ROTASI (TIDAK SENTUH OBJEK) -->
+            <!-- TRANSFORM DENGAN PERSPEKTIF, ROTOR UKURAN, ROTASI & EFEK UNIVERSAL -->
             <div id="pane-transform" class="panel-pane">
                 <div class="control-block">
                     <div class="label-row"><span>ROTOR UKURAN (SCALE)</span><span id="v-rotor-scale">1.0x</span></div>
@@ -862,9 +917,29 @@
                     <div class="label-row"><span>ROTOR ROTASI (Z ROTATION)</span><span id="v-rotor-rot">0°</span></div>
                     <input type="range" id="p-rotor-rot" min="0" max="360" value="0" oninput="updateRotorTransform()">
                 </div>
-                <div class="grid-2">
-                    <button class="btn-ui" style="background:#05BDFB; color:#fff; border-color:#05BDFB;" onclick="fitToCanvasArea()">ISI SEMUA AREA CANVAS</button>
-                    <button class="btn-ui" style="background:var(--danger); color:#fff; border-color:var(--danger);" onclick="deleteActiveLayer()">HAPUS OBJEK</button>
+                <div class="control-block">
+                    <div class="label-row"><span>PERSPEKTIF MENCORONG (SKEW X / Y)</span></div>
+                    <div class="grid-2">
+                        <div class="control-row"><span>X:</span><input type="range" id="p-skew-x" min="-50" max="50" value="0" oninput="updateRotorTransform()"></div>
+                        <div class="control-row"><span>Y:</span><input type="range" id="p-skew-y" min="-50" max="50" value="0" oninput="updateRotorTransform()"></div>
+                    </div>
+                </div>
+                <div class="control-block">
+                    <div class="label-row"><span>EFEK BAYANGAN & OUTLINE OBJEK</span></div>
+                    <div class="grid-2">
+                        <div class="control-row"><span>WARNA OUTLINE:</span><input type="color" id="p-obj-outline-color" value="#ffffff" onchange="updateObjectEffects()"></div>
+                        <div class="control-row"><span>TEBAL:</span><input type="range" id="p-obj-outline-w" min="0" max="15" value="0" oninput="updateObjectEffects()"></div>
+                    </div>
+                    <div class="control-row" style="margin-top:4px;">
+                        <label style="font-size:10px; display:flex; gap:4px; align-items:center;">
+                            <input type="checkbox" id="p-obj-shadow" onchange="updateObjectEffects()"> AKTIFKAN EFEK BAYANGAN OBJEK
+                        </label>
+                    </div>
+                </div>
+                <div class="grid-3">
+                    <button class="btn-ui" style="background:#05BDFB; color:#fff; border-color:#05BDFB;" onclick="fitToCanvasArea()">ISI CANVAS</button>
+                    <button class="btn-ui" style="background:var(--danger); color:#fff; border-color:var(--danger);" onclick="deleteActiveLayer()">HAPUS</button>
+                    <button class="btn-ui" onclick="duplicateActiveLayer()">DUPLIKAT</button>
                 </div>
                 <div class="grid-2">
                     <button class="btn-ui" onclick="flipLayer('h')">FLIP HORISONTAL</button>
@@ -908,7 +983,7 @@
                 </div>
             </div>
 
-            <!-- TEKS DENGAN FITUR OUTLINE -->
+            <!-- TEKS DENGAN FITUR OUTLINE & 3D DIPERBAIKI -->
             <div id="pane-text" class="panel-pane">
                 <div class="grid-2">
                     <button class="btn-ui" style="background:var(--accent); color:#ffffff; border-color:var(--accent);" onclick="addCenterTextLayer()">+ TEKS BARU</button>
@@ -950,7 +1025,7 @@
                     </div>
                 </div>
                 <div class="control-block">
-                    <div class="label-row"><span>EFEK TAMBAHAN</span></div>
+                    <div class="label-row"><span>EFEK TAMBAHAN TEKS</span></div>
                     <div class="grid-2">
                         <label style="font-size:10px; display:flex; gap:4px; align-items:center;">
                             <input type="checkbox" id="p-text-3d" onchange="updateTextProps()"> TEKS 3D
@@ -962,13 +1037,23 @@
                 </div>
             </div>
 
-            <!-- OVERLAY & GALERI -->
+            <!-- OVERLAY & GALERI (DENGAN TOMBOL ICON & FITUR GANTI FOTO) -->
             <div id="pane-blend" class="panel-pane">
-                <label class="btn-ui" style="display:flex;">
-                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                    AMBIL GAMBAR GALERI
-                    <input type="file" accept="image/*" style="display:none;" onchange="openCropModal(event)">
-                </label>
+                <div class="control-block">
+                    <div class="label-row"><span>SUMBER GAMBAR</span></div>
+                    <div class="grid-2">
+                        <button class="icon-btn" style="width:100%; height:36px;" onclick="document.getElementById('galleryInput').click()" title="Upload Gambar Baru">
+                            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                            <span>TAMBAH FOTO</span>
+                        </button>
+                        <button class="icon-btn" style="width:100%; height:36px;" onclick="document.getElementById('replaceInput').click()" title="Ganti Foto Objek Aktif">
+                            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>
+                            <span>GANTI FOTO</span>
+                        </button>
+                    </div>
+                    <input type="file" id="galleryInput" accept="image/*" style="display:none;" onchange="openCropModal(event, false)">
+                    <input type="file" id="replaceInput" accept="image/*" style="display:none;" onchange="openCropModal(event, true)">
+                </div>
                 <div class="control-block">
                     <div class="label-row"><span>BLEND MODE</span></div>
                     <select id="p-blend-mode" onchange="updateBlendProps()">
@@ -997,9 +1082,40 @@
         <div class="tool-node" onclick="switchTab('shape', document.querySelectorAll('.tab-btn')[3])">
             <svg viewBox="0 0 24 24"><path d="M12 2l10 6.5v9L12 22 2 17.5v-9z"/></svg>BENTUK
         </div>
-        <div class="tool-node" onclick="switchTab('blend', document.querySelectorAll('.tab-btn')[4])">
+        <div class="tool-node" onclick="switchTab('blend', document.querySelectorAll('.tab-btn')[5])">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>GALERI
         </div>
+    </div>
+</div>
+
+<!-- Modal Pop-up Export CSS Buatan -->
+<div class="custom-modal-overlay" id="exportModal">
+    <div class="custom-modal-card">
+        <div class="custom-modal-title">
+            <span>PENGATURAN EXPORT FILE</span>
+            <button class="btn-ui" style="padding:2px 6px;" onclick="closeExportModal()">✕</button>
+        </div>
+        <div class="control-block">
+            <div class="label-row"><span>FORMAT GAMBAR / TEMPLATE</span></div>
+            <select id="export-format">
+                <option value="image/png">PNG (Lossless / Transparan)</option>
+                <option value="image/jpeg">JPG / JPEG (Kompresi Ringan)</option>
+                <option value="xml">XML Template Project (.xml)</option>
+            </select>
+        </div>
+        <div class="control-block" id="quality-block">
+            <div class="label-row"><span>KUALITAS EXPORT</span><span id="v-export-q">90%</span></div>
+            <input type="range" id="p-export-quality" min="10" max="100" value="90" oninput="document.getElementById('v-export-q').innerText = this.value + '%'">
+        </div>
+        <button class="btn-ui" style="background:var(--accent); color:#fff; border-color:var(--accent); padding:10px; font-weight:800;" onclick="executeExport()">DOWNLOAD SEKARANG</button>
+    </div>
+</div>
+
+<!-- Modal Loading XML Import -->
+<div class="custom-modal-overlay" id="loadingModal">
+    <div class="custom-modal-card" style="align-items:center; text-align:center; padding:24px;">
+        <div style="font-size:12px; font-weight:800; color:var(--accent);">MENGIMPOR TEMPLATE XML...</div>
+        <div style="font-size:10px; color:var(--text-sub);">Mohon tunggu sebentar, sedang memproses data template...</div>
     </div>
 </div>
 
@@ -1089,6 +1205,8 @@
     const stage = document.getElementById('stage');
     const ctx = stage.getContext('2d', { alpha: true });
     const overlay = document.getElementById('transform-overlay');
+    const workspace = document.getElementById('workspace');
+    const stageContainer = document.getElementById('stage-container');
 
     let layers = [];
     let activeIndex = null;
@@ -1097,12 +1215,20 @@
     let activeTool = 'select';
     let showGrid = false;
 
+    // Viewport Zoom & Pan State
+    let zoomLevel = 1;
+    let panX = 0;
+    let panY = 0;
+    let isPanning = false;
+    let panStart = { x: 0, y: 0 };
+
     let isMovingObject = false;
     let pointerId = null;
     let moveStartX = 0, moveStartY = 0;
     let initialObjX = 0, initialObjY = 0;
 
     let rawCropImg = null;
+    let isReplacingPhoto = false;
     let cropBoxState = { x: 0, y: 0, w: 100, h: 100 };
     let cropRotation = 0;
     let cropFlipH = 1;
@@ -1110,6 +1236,8 @@
     function initEngine() {
         createBaseLayer();
         setupInteractionListeners();
+        setupWorkspacePanZoom();
+        updateStageFit();
         saveHistoryState();
         renderStage();
     }
@@ -1128,14 +1256,72 @@
             type: 'raster',
             canvas: baseCanvas,
             x: 0, y: 0, width: stage.width, height: stage.height,
-            scale: 1, rotation: 0,
+            scale: 1, rotation: 0, skewX: 0, skewY: 0,
             opacity: 1, blendMode: 'source-over',
             visible: true, locked: true, flipH: 1, flipV: 1,
+            outlineColor: '#ffffff', outlineWidth: 0, hasShadow: false,
             filters: { bright:0, contrast:0, sat:0, blur:0 }
         };
         layers.push(layer);
         activeIndex = 0;
         rebuildLayerUI();
+    }
+
+    function updateStageFit() {
+        const wsRect = workspace.getBoundingClientRect();
+        const maxW = wsRect.width - 40;
+        const maxH = wsRect.height - 40;
+        
+        const scaleW = maxW / stage.width;
+        const scaleH = maxH / stage.height;
+        zoomLevel = Math.min(scaleW, scaleH, 1);
+        panX = 0;
+        panY = 0;
+        applyStageTransform();
+    }
+
+    function applyStageTransform() {
+        stageContainer.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`;
+    }
+
+    function setupWorkspacePanZoom() {
+        let isSpacePressed = false;
+        window.addEventListener('keydown', (e) => { if (e.code === 'Space') isSpacePressed = true; });
+        window.addEventListener('keyup', (e) => { if (e.code === 'Space') isSpacePressed = false; });
+
+        workspace.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const zoomFactor = 1.1;
+            if (e.deltaY < 0) {
+                zoomLevel = Math.min(zoomLevel * zoomFactor, 5);
+            } else {
+                zoomLevel = Math.max(zoomLevel / zoomFactor, 0.2);
+            }
+            applyStageTransform();
+        }, { passive: false });
+
+        workspace.addEventListener('pointerdown', (e) => {
+            if (e.button === 1 || isSpacePressed || e.target === workspace || e.target === stageContainer) {
+                isPanning = true;
+                panStart = { x: e.clientX - panX, y: e.clientY - panY };
+                workspace.setPointerCapture(e.pointerId);
+            }
+        });
+
+        workspace.addEventListener('pointermove', (e) => {
+            if (isPanning) {
+                panX = e.clientX - panStart.x;
+                panY = e.clientY - panStart.y;
+                applyStageTransform();
+            }
+        });
+
+        workspace.addEventListener('pointerup', (e) => {
+            if (isPanning) {
+                isPanning = false;
+                try { workspace.releasePointerCapture(e.pointerId); } catch(err) {}
+            }
+        });
     }
 
     function toggleGrid() {
@@ -1178,6 +1364,7 @@
             layers[0].height = h;
         }
 
+        updateStageFit();
         renderStage();
         saveHistoryState();
     }
@@ -1193,7 +1380,8 @@
             fillColor: document.getElementById('p-shape-fill').value,
             strokeColor: document.getElementById('p-shape-stroke').value,
             strokeWidth: parseFloat(document.getElementById('p-shape-stroke-w').value),
-            x: 0, y: 0, scale: 1, rotation: 0,
+            outlineColor: '#ffffff', outlineWidth: 0, hasShadow: false,
+            x: 0, y: 0, scale: 1, rotation: 0, skewX: 0, skewY: 0,
             opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1
         };
         layers.push(layer);
@@ -1220,7 +1408,7 @@
             align: 'center',
             is3D: false,
             hasShadow: false,
-            x: 0, y: 0, scale: 1, rotation: 0,
+            x: 0, y: 0, scale: 1, rotation: 0, skewX: 0, skewY: 0,
             opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1
         };
         layers.push(layer);
@@ -1236,10 +1424,21 @@
 
         l.scale = parseFloat(document.getElementById('p-rotor-scale').value);
         l.rotation = parseFloat(document.getElementById('p-rotor-rot').value);
+        l.skewX = parseFloat(document.getElementById('p-skew-x').value);
+        l.skewY = parseFloat(document.getElementById('p-skew-y').value);
 
         document.getElementById('v-rotor-scale').innerText = l.scale.toFixed(2) + 'x';
         document.getElementById('v-rotor-rot').innerText = l.rotation + '°';
 
+        renderStage();
+    }
+
+    function updateObjectEffects() {
+        if (activeIndex === null || !layers[activeIndex]) return;
+        const l = layers[activeIndex];
+        l.outlineColor = document.getElementById('p-obj-outline-color').value;
+        l.outlineWidth = parseFloat(document.getElementById('p-obj-outline-w').value);
+        l.hasShadow = document.getElementById('p-obj-shadow').checked;
         renderStage();
     }
 
@@ -1250,8 +1449,12 @@
         l.x = 0;
         l.y = 0;
         l.rotation = 0;
+        l.skewX = 0;
+        l.skewY = 0;
         document.getElementById('p-rotor-rot').value = 0;
         document.getElementById('v-rotor-rot').innerText = '0°';
+        document.getElementById('p-skew-x').value = 0;
+        document.getElementById('p-skew-y').value = 0;
 
         l.scale = Math.max(stage.width / l.width, stage.height / l.height);
         document.getElementById('p-rotor-scale').value = l.scale;
@@ -1376,10 +1579,30 @@
 
             ctx.translate(stage.width / 2 + layer.x, stage.height / 2 + layer.y);
             ctx.rotate((layer.rotation * Math.PI) / 180);
+            
+            // Perspekstif / Skew Matrix Transformation
+            if (layer.skewX || layer.skewY) {
+                ctx.transform(1, layer.skewY * 0.01, layer.skewX * 0.01, 1, 0, 0);
+            }
+
             ctx.scale(layer.scale * layer.flipH, layer.scale * layer.flipV);
+
+            // Efek Bayangan Universal
+            if (layer.hasShadow) {
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+                ctx.shadowBlur = 12;
+                ctx.shadowOffsetX = 6;
+                ctx.shadowOffsetY = 6;
+            }
 
             if (layer.type === 'raster') {
                 const filtered = applyFilters(layer);
+                if (layer.outlineWidth > 0) {
+                    ctx.save();
+                    ctx.filter = `drop-shadow(0 0 ${layer.outlineWidth}px ${layer.outlineColor})`;
+                    ctx.drawImage(filtered, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
+                    ctx.restore();
+                }
                 ctx.drawImage(filtered, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
             } else if (layer.type === 'text') {
                 renderTextNode(ctx, layer);
@@ -1432,6 +1655,11 @@
         }
 
         if (l.fillColor) { targetCtx.fillStyle = l.fillColor; targetCtx.fill(); }
+        if (l.outlineWidth > 0) {
+            targetCtx.strokeStyle = l.outlineColor;
+            targetCtx.lineWidth = l.outlineWidth;
+            targetCtx.stroke();
+        }
         if (l.strokeWidth > 0) { targetCtx.strokeStyle = l.strokeColor; targetCtx.lineWidth = l.strokeWidth; targetCtx.stroke(); }
     }
 
@@ -1458,6 +1686,14 @@
 
             targetCtx.textAlign = align === 'justify' ? 'center' : align;
             targetCtx.textBaseline = 'middle';
+
+            // Efek 3D Teks
+            if (l.is3D) {
+                targetCtx.fillStyle = '#005588';
+                for (let d = 1; d <= 4; d++) {
+                    targetCtx.fillText(line, drawX + d, currentY + d);
+                }
+            }
 
             if (l.outlineWidth && l.outlineWidth > 0) {
                 targetCtx.lineWidth = l.outlineWidth;
@@ -1514,7 +1750,7 @@
         box.style.height = h + 'px';
         box.style.left = (cx - w / 2) + 'px';
         box.style.top = (cy - h / 2) + 'px';
-        box.style.transform = `rotate(${l.rotation}deg)`;
+        box.style.transform = `rotate(${l.rotation}deg) skew(${l.skewX || 0}deg, ${l.skewY || 0}deg)`;
 
         const delBtn = document.createElement('div');
         delBtn.className = 'bbox-handle-delete';
@@ -1712,6 +1948,8 @@
 
             document.getElementById('p-rotor-rot').value = layers[idx].rotation || 0;
             document.getElementById('v-rotor-rot').innerText = (layers[idx].rotation || 0) + '°';
+            document.getElementById('p-skew-x').value = layers[idx].skewX || 0;
+            document.getElementById('p-skew-y').value = layers[idx].skewY || 0;
 
             if (layers[idx].type === 'text') {
                 document.getElementById('p-text-str').value = layers[idx].text || '';
@@ -1722,6 +1960,8 @@
                 if (layers[idx].outlineColor) {
                     document.getElementById('p-text-outline-color').value = layers[idx].outlineColor;
                 }
+                document.getElementById('p-text-3d').checked = !!layers[idx].is3D;
+                document.getElementById('p-text-shadow').checked = !!layers[idx].hasShadow;
             }
         }
         renderStage();
@@ -1760,6 +2000,8 @@
         newLayer.id = 'layer_' + Date.now();
         newLayer.name = l.name + ' Copy';
         newLayer.canvas = dupCanvas;
+        newLayer.x += 15;
+        newLayer.y += 15;
 
         layers.push(newLayer);
         activeIndex = layers.length - 1;
@@ -1813,9 +2055,10 @@
         renderStage();
     }
 
-    function openCropModal(e) {
+    function openCropModal(e, replace = false) {
         const file = e.target.files[0];
         if (!file) return;
+        isReplacingPhoto = replace;
 
         const reader = new FileReader();
         reader.onload = (evt) => {
@@ -1993,20 +2236,27 @@
             0, 0, cropBoxState.w, cropBoxState.h
         );
 
-        const layer = {
-            id: 'img_' + Date.now(),
-            name: 'Gambar ' + (layers.length + 1),
-            type: 'raster',
-            canvas: croppedCanvas,
-            width: cropBoxState.w, height: cropBoxState.h,
-            x: 0, y: 0, scale: Math.min(stage.width / cropBoxState.w, stage.height / cropBoxState.h) * 0.8,
-            rotation: 0,
-            opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1,
-            filters: { bright:0, contrast:0, sat:0, blur:0 }
-        };
+        if (isReplacingPhoto && activeIndex !== null && layers[activeIndex] && layers[activeIndex].type === 'raster') {
+            layers[activeIndex].canvas = croppedCanvas;
+            layers[activeIndex].width = cropBoxState.w;
+            layers[activeIndex].height = cropBoxState.h;
+        } else {
+            const layer = {
+                id: 'img_' + Date.now(),
+                name: 'Gambar ' + (layers.length + 1),
+                type: 'raster',
+                canvas: croppedCanvas,
+                width: cropBoxState.w, height: cropBoxState.h,
+                x: 0, y: 0, scale: Math.min(stage.width / cropBoxState.w, stage.height / cropBoxState.h) * 0.8,
+                rotation: 0, skewX: 0, skewY: 0,
+                opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1,
+                outlineColor: '#ffffff', outlineWidth: 0, hasShadow: false,
+                filters: { bright:0, contrast:0, sat:0, blur:0 }
+            };
+            layers.push(layer);
+            activeIndex = layers.length - 1;
+        }
 
-        layers.push(layer);
-        activeIndex = layers.length - 1;
         rebuildLayerUI();
         renderStage();
         saveHistoryState();
@@ -2050,11 +2300,168 @@
         element.classList.add('active');
     }
 
-    function exportCanvas() {
+    // Modal Export CSS Buatan
+    function openExportModal() {
+        document.getElementById('exportModal').classList.add('open');
+    }
+
+    function closeExportModal() {
+        document.getElementById('exportModal').classList.remove('open');
+    }
+
+    function executeExport() {
+        const format = document.getElementById('export-format').value;
+        const quality = parseFloat(document.getElementById('p-export-quality').value) / 100;
+        closeExportModal();
+
+        if (format === 'xml') {
+            generateXMLTemplate();
+        } else {
+            const link = document.createElement('a');
+            link.download = `MYshoot_Export_${Date.now()}.${format === 'image/jpeg' ? 'jpg' : 'png'}`;
+            link.href = stage.toDataURL(format, quality);
+            link.click();
+        }
+    }
+
+    // Primadona: Export XML & Import XML Template
+    function generateXMLTemplate() {
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<MYshootTemplate version="1.0" width="${stage.width}" height="${stage.height}">\n`;
+        layers.forEach((l, idx) => {
+            xml += `  <Layer id="${l.id}" name="${l.name}" type="${l.type}" x="${l.x}" y="${l.y}" scale="${l.scale}" rotation="${l.rotation}" opacity="${l.opacity}" blendMode="${l.blendMode}">\n`;
+            if (l.type === 'text') {
+                xml += `    <Text content="${encodeURIComponent(l.text)}" fontSize="${l.fontSize}" fontFamily="${l.fontFamily}" fillColor="${l.fillColor}" align="${l.align}" is3D="${l.is3D}" hasShadow="${l.hasShadow}"/>\n`;
+            } else if (l.type === 'shape') {
+                xml += `    <Shape shapeType="${l.shapeType}" width="${l.width}" height="${l.height}" fillColor="${l.fillColor}" strokeColor="${l.strokeColor}" strokeWidth="${l.strokeWidth}"/>\n`;
+            } else if (l.type === 'raster' && idx > 0) {
+                xml += `    <Raster imgData="${l.canvas.toDataURL()}"/>\n`;
+            }
+            xml += `  </Layer>\n`;
+        });
+        xml += `</MYshootTemplate>`;
+
+        const blob = new Blob([xml], { type: 'application/xml' });
+        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.download = `MYshoot_Export_${Date.now()}.png`;
-        link.href = stage.toDataURL('image/png', 1.0);
+        link.download = `MYshoot_Template_${Date.now()}.xml`;
+        link.href = url;
         link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function triggerImportXML() {
+        document.getElementById('xmlFileLoader').click();
+    }
+
+    function importXMLTemplate(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const loadingModal = document.getElementById('loadingModal');
+        loadingModal.classList.add('open');
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(evt.target.result, "text/xml");
+                const root = xmlDoc.getElementsByTagName('MYshootTemplate')[0];
+                if (!root) throw new Error("Format XML tidak valid");
+
+                const w = parseInt(root.getAttribute('width')) || 720;
+                const h = parseInt(root.getAttribute('height')) || 1280;
+                setCanvasPreset(w, h);
+
+                layers = [];
+                const layerNodes = xmlDoc.getElementsByTagName('Layer');
+                
+                for (let node of layerNodes) {
+                    const lType = node.getAttribute('type');
+                    const lId = node.getAttribute('id');
+                    const lName = node.getAttribute('name');
+                    const x = parseFloat(node.getAttribute('x')) || 0;
+                    const y = parseFloat(node.getAttribute('y')) || 0;
+                    const scale = parseFloat(node.getAttribute('scale')) || 1;
+                    const rotation = parseFloat(node.getAttribute('rotation')) || 0;
+                    const opacity = parseFloat(node.getAttribute('opacity')) || 1;
+                    const blendMode = node.getAttribute('blendMode') || 'source-over';
+
+                    if (lId === 'layer_base') {
+                        createBaseLayer();
+                        continue;
+                    }
+
+                    if (lType === 'text') {
+                        const tNode = node.getElementsByTagName('Text')[0];
+                        const layer = {
+                            id: lId, name: lName, type: 'text',
+                            text: decodeURIComponent(tNode.getAttribute('content')),
+                            fontSize: parseFloat(tNode.getAttribute('fontSize')),
+                            fontFamily: tNode.getAttribute('fontFamily'),
+                            fillColor: tNode.getAttribute('fillColor'),
+                            align: tNode.getAttribute('align'),
+                            is3D: tNode.getAttribute('is3D') === 'true',
+                            hasShadow: tNode.getAttribute('hasShadow') === 'true',
+                            x, y, scale, rotation, opacity, blendMode,
+                            width: 200, height: 60, visible: true, locked: false, flipH: 1, flipV: 1,
+                            outlineColor: '#000000', outlineWidth: 0, filters: { bright:0, contrast:0, sat:0, blur:0 }
+                        };
+                        layers.push(layer);
+                    } else if (lType === 'shape') {
+                        const sNode = node.getElementsByTagName('Shape')[0];
+                        const layer = {
+                            id: lId, name: lName, type: 'shape',
+                            shapeType: sNode.getAttribute('shapeType'),
+                            width: parseFloat(sNode.getAttribute('width')),
+                            height: parseFloat(sNode.getAttribute('height')),
+                            fillColor: sNode.getAttribute('fillColor'),
+                            strokeColor: sNode.getAttribute('strokeColor'),
+                            strokeWidth: parseFloat(sNode.getAttribute('strokeWidth')),
+                            x, y, scale, rotation, opacity, blendMode,
+                            visible: true, locked: false, flipH: 1, flipV: 1,
+                            outlineColor: '#ffffff', outlineWidth: 0, hasShadow: false
+                        };
+                        layers.push(layer);
+                    } else if (lType === 'raster') {
+                        const rNode = node.getElementsByTagName('Raster')[0];
+                        const imgData = rNode.getAttribute('imgData');
+                        const img = new Image();
+                        img.src = imgData;
+                        const rCanvas = document.createElement('canvas');
+                        
+                        img.onload = () => {
+                            rCanvas.width = img.width;
+                            rCanvas.height = img.height;
+                            rCanvas.getContext('2d').drawImage(img, 0, 0);
+                            renderStage();
+                        };
+
+                        const layer = {
+                            id: lId, name: lName, type: 'raster',
+                            canvas: rCanvas, width: 300, height: 300,
+                            x, y, scale, rotation, opacity, blendMode,
+                            visible: true, locked: false, flipH: 1, flipV: 1,
+                            outlineColor: '#ffffff', outlineWidth: 0, hasShadow: false,
+                            filters: { bright:0, contrast:0, sat:0, blur:0 }
+                        };
+                        layers.push(layer);
+                    }
+                }
+
+                setTimeout(() => {
+                    loadingModal.classList.remove('open');
+                    activeIndex = layers.length - 1;
+                    rebuildLayerUI();
+                    renderStage();
+                    saveHistoryState();
+                }, 800);
+
+            } catch (err) {
+                loadingModal.classList.remove('open');
+                alert("Gagal mengimpor file XML template: " + err.message);
+            }
+        };
+        reader.readAsText(file);
     }
 
     initEngine();
