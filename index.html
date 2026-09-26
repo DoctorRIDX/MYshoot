@@ -1,0 +1,2062 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MYshoot Studio - Pro Edition</title>
+    <style>
+        /* Font Local impact.ttf */
+        @font-face {
+            font-family: 'ImpactCustom';
+            src: url('impact.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        :root {
+            --bg-base: #ebf3fa;
+            --bg-panel: #ffffff;
+            --bg-card: #f0f7ff;
+            --bg-input: #ffffff;
+            --border: #b8d5f2;
+            --accent: #05BDFB;
+            --accent-hover: #0098cc;
+            --accent-glow: rgba(5, 189, 251, 0.3);
+            --danger: #ef4444;
+            --text-main: #0f172a;
+            --text-sub: #475569;
+            --radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #dbeafe;
+            color: var(--text-main);
+        }
+
+        .viewport {
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-base);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Header Bar */
+        .top-bar {
+            height: 95px;
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .brand-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .brand-logo {
+            height: 100px;
+            max-width: 920px;
+            object-fit: contain;
+        }
+
+        .brand-subtext {
+            font-family: 'ImpactCustom', Impact, sans-serif;
+            font-size: 19px;
+            letter-spacing: 2px;
+            color: #05BDFB;
+            margin-top: -30px;
+        }
+
+        .icon-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            min-width: 32px;
+            height: 32px;
+            padding: 0 6px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            transition: background 0.15s ease;
+        }
+
+        .icon-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
+        .icon-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        /* Workspace Canvas Area */
+        .workspace {
+            flex: 1;
+            position: relative;
+            background-color: #e2eaf4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 10px;
+            touch-action: none;
+        }
+
+        #stage-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(5, 189, 251, 0.15);
+        }
+
+        #stage {
+            background-image: 
+                linear-gradient(45deg, #cbd5e1 25%, transparent 25%), 
+                linear-gradient(-45deg, #cbd5e1 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #cbd5e1 75%), 
+                linear-gradient(-45deg, transparent 75%, #cbd5e1 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+            border-radius: 4px;
+            max-width: 100%;
+            max-height: 100%;
+            background-color: #ffffff;
+        }
+
+        #transform-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .bbox {
+            position: absolute;
+            border: 2px dashed #05BDFB;
+            box-shadow: 0 0 10px var(--accent-glow);
+            pointer-events: auto;
+            box-sizing: border-box;
+            transform-origin: center center;
+            will-change: transform, left, top;
+        }
+
+        .bbox-handle-delete {
+            position: absolute;
+            top: -14px;
+            left: -14px;
+            width: 26px;
+            height: 26px;
+            background: var(--danger);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            z-index: 20;
+        }
+
+        .bbox-handle-delete svg {
+            width: 14px;
+            height: 14px;
+            stroke: #ffffff;
+            stroke-width: 2.5;
+        }
+
+        .bbox-handle-lock {
+            position: absolute;
+            top: -14px;
+            right: -14px;
+            width: 26px;
+            height: 26px;
+            background: #475569;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            z-index: 20;
+        }
+
+        .bbox-handle-lock.locked {
+            background: var(--danger);
+        }
+
+        .bbox-handle-lock svg {
+            width: 14px;
+            height: 14px;
+            stroke: #ffffff;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .bbox-move-box {
+            position: absolute;
+            top: -42px;
+            left: calc(50% - 40px);
+            width: 80px;
+            height: 26px;
+            background: #05BDFB;
+            color: #fff;
+            border-radius: 14px;
+            font-size: 9px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            z-index: 25;
+            letter-spacing: 0.5px;
+        }
+
+        /* Layer Panel Drawer */
+        .layer-drawer {
+            position: absolute;
+            top: 76px;
+            left: 0;
+            width: 280px;
+            height: calc(100% - 76px);
+            background-color: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(14px);
+            border-right: 1px solid var(--border);
+            z-index: 150;
+            transform: translateX(-100%);
+            transition: transform 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .layer-drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            padding: 12px;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            font-size: 11px;
+            font-weight: 800;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .layer-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            touch-action: pan-y;
+        }
+
+        .layer-item {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
+            padding: 8px 10px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11px;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        .layer-item.active {
+            border-color: var(--accent);
+            background-color: #e0f2fe;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .layer-controls {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+        }
+
+        .btn-layer-action {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+        }
+
+        .btn-layer-action:hover {
+            background-color: var(--bg-card);
+            color: var(--accent);
+        }
+
+        .btn-layer-action svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* Inspector Panel Bawah & Tombol Segitiga */
+        .inspector-container {
+            position: relative;
+            background-color: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 50;
+            transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+            flex-shrink: 0;
+        }
+
+        .inspector-container.collapsed {
+            transform: translateY(calc(100% - 24px));
+        }
+
+        .toggle-menu-btn {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 48px;
+            height: 22px;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 60;
+            color: var(--accent);
+            box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+        }
+
+        .toggle-menu-btn svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+            transition: transform 0.3s ease;
+        }
+
+        .inspector-container.collapsed .toggle-menu-btn svg {
+            transform: rotate(180deg);
+        }
+
+        .inspector-tabs {
+            display: flex;
+            background-color: var(--bg-base);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            scrollbar-width: none;
+            touch-action: pan-x;
+        }
+
+        .inspector-tabs::-webkit-scrollbar { display: none; }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-color: var(--accent);
+            background-color: var(--bg-panel);
+        }
+
+        .tab-btn svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .inspector-body {
+            max-height: 220px;
+            padding: 12px;
+            overflow-y: auto !important;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            touch-action: pan-y !important;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .panel-pane {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .panel-pane.active { display: flex; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+        .control-block {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            background: var(--bg-card);
+            padding: 8px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            color: var(--text-sub);
+            font-weight: 700;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            background: #cbd5e1;
+            accent-color: var(--accent);
+            border-radius: 2px;
+            touch-action: pan-x;
+        }
+
+        input[type="color"] {
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: var(--radius);
+            background: none;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 8px;
+            font-size: 10px;
+            border-radius: var(--radius);
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 45px;
+            font-family: inherit;
+        }
+
+        .btn-ui {
+            background-color: #ffffff;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px;
+            font-size: 9px;
+            font-weight: 700;
+            border-radius: var(--radius);
+            cursor: pointer;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .btn-ui:active {
+            background-color: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
+        /* Footer Bar Toolbar */
+        .footer-tools {
+            height: 60px;
+            background-color: var(--bg-panel);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 4px;
+            overflow-x: auto;
+            touch-action: pan-x;
+            flex-shrink: 0;
+        }
+
+        .tool-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            color: var(--text-sub);
+            cursor: pointer;
+            font-size: 8px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            flex-shrink: 0;
+        }
+
+        .tool-node.active {
+            color: var(--accent);
+            background-color: #e0f2fe;
+        }
+
+        .tool-node svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* Modal Crop Gambar */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #121212;
+            z-index: 300;
+            display: none;
+            flex-direction: column;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .crop-header {
+            height: 48px;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+
+        .crop-viewport {
+            flex: 1;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #crop-canvas-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        #crop-canvas {
+            display: block;
+            max-width: 90vw;
+            max-height: 60vh;
+            background-image: 
+                linear-gradient(45deg, #222 25%, transparent 25%), 
+                linear-gradient(-45deg, #222 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #222 75%), 
+                linear-gradient(-45deg, transparent 75%, #222 75%);
+            background-size: 16px 16px;
+        }
+
+        .crop-box {
+            position: absolute;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65);
+            box-sizing: border-box;
+            cursor: move;
+        }
+
+        .crop-grid-line {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .crop-grid-h1 { top: 33.33%; left: 0; width: 100%; height: 1px; }
+        .crop-grid-h2 { top: 66.66%; left: 0; width: 100%; height: 1px; }
+        .crop-grid-v1 { left: 33.33%; top: 0; height: 100%; width: 1px; }
+        .crop-grid-v2 { left: 66.66%; top: 0; height: 100%; width: 1px; }
+
+        .crop-handle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .handle-tl { top: -8px; left: -8px; cursor: nwse-resize; }
+        .handle-tr { top: -8px; right: -8px; cursor: nesw-resize; }
+        .handle-bl { bottom: -8px; left: -8px; cursor: nesw-resize; }
+        .handle-br { bottom: -8px; right: -8px; cursor: nwse-resize; }
+
+        .handle-tm { top: -8px; left: calc(50% - 8px); cursor: ns-resize; }
+        .handle-bm { bottom: -8px; left: calc(50% - 8px); cursor: ns-resize; }
+        .handle-lm { left: -8px; top: calc(50% - 8px); cursor: ew-resize; }
+        .handle-rm { right: -8px; top: calc(50% - 8px); cursor: ew-resize; }
+
+        .crop-controls {
+            background: #1a1a1a;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .crop-ratios-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 6px 0;
+            scrollbar-width: none;
+        }
+
+        .crop-ratios-scroll::-webkit-scrollbar { display: none; }
+
+        .ratio-node {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 9px;
+            cursor: pointer;
+            flex-shrink: 0;
+            gap: 4px;
+        }
+
+        .ratio-node.active { color: #fff; }
+
+        .ratio-box-icon {
+            width: 22px;
+            height: 22px;
+            border: 1.5px solid currentColor;
+            border-radius: 2px;
+        }
+
+        .crop-action-bar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border-top: 1px solid #333;
+            padding-top: 8px;
+        }
+
+        .btn-crop-action {
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        .btn-crop-action svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+    </style>
+</head>
+<body>
+
+<div class="viewport">
+    <!-- Top Bar Header -->
+    <div class="top-bar">
+        <button class="icon-btn" onclick="toggleLayerDrawer()" title="Panel Lapisan">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            <span>LAYERS</span>
+        </button>
+        <button class="icon-btn" id="gridToggleBtn" onclick="toggleGrid()" title="Garis Bantu / Grid">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        </button>
+        
+        <!-- Logo & Subtitle -->
+        <div class="brand-container">
+            <img src="logo.png" alt="MYshoot Logo" class="brand-logo" />
+            <span class="brand-subtext">MYshoot EDITOR</span>
+        </div>
+
+        <div style="display:flex; gap:4px;">
+            <button class="icon-btn" onclick="undo()" title="Undo">
+                <svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+            </button>
+            <button class="icon-btn" onclick="redo()" title="Redo">
+                <svg viewBox="0 0 24 24"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>
+            </button>
+            <button class="btn-ui" style="background:var(--accent); color:#ffffff; border-color:var(--accent);" onclick="exportCanvas()">EXPORT</button>
+        </div>
+    </div>
+
+    <!-- Workspace Area -->
+    <div class="workspace" id="workspace">
+        <div id="stage-container">
+            <canvas id="stage" width="720" height="1280"></canvas>
+            <div id="transform-overlay"></div>
+        </div>
+    </div>
+
+    <!-- Layer Panel Drawer -->
+    <div class="layer-drawer" id="layerDrawer">
+        <div class="drawer-header">
+            <span>SUSUNAN LAPISAN</span>
+            <button class="btn-ui" style="padding:4px 8px;" onclick="addCenterTextLayer()">+ TEKS</button>
+        </div>
+        <div class="layer-list" id="layerList"></div>
+        <div style="padding: 8px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+            <button class="btn-ui" onclick="mergeSelectedLayer()">GABUNG</button>
+            <button class="btn-ui" onclick="duplicateActiveLayer()">DUPLIKAT</button>
+        </div>
+    </div>
+
+    <!-- Inspector Panel Bawah -->
+    <div class="inspector-container" id="inspectorContainer">
+        <div class="toggle-menu-btn" onclick="toggleMenuDrawer()" title="Sembunyikan / Tampilkan Menu">
+            <svg viewBox="0 0 24 24"><polygon points="12,6 4,18 20,18"/></svg>
+        </div>
+
+        <div class="inspector-tabs">
+            <button class="tab-btn active" onclick="switchTab('canvas', this)" title="Canvas Layout">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </button>
+            <button class="tab-btn" onclick="switchTab('core', this)" title="Color Adjustments">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/></svg>
+            </button>
+            <button class="tab-btn" onclick="switchTab('transform', this)" title="Transform & Rotor Alight Motion">
+                <svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+            </button>
+            <button class="tab-btn" onclick="switchTab('shape', this)" title="Bentuk Geometris">
+                <svg viewBox="0 0 24 24"><path d="M12 2l10 6.5v9L12 22 2 17.5v-9z"/></svg>
+            </button>
+            <button class="tab-btn" onclick="switchTab('text', this)" title="Teks & Tipografi">
+                <svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+            </button>
+            <button class="tab-btn" onclick="switchTab('blend', this)" title="Overlay & Galeri">
+                <svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="6"/><circle cx="15" cy="12" r="6"/></svg>
+            </button>
+        </div>
+
+        <div class="inspector-body">
+            <!-- CANVAS -->
+            <div id="pane-canvas" class="panel-pane active">
+                <div class="control-block">
+                    <div class="label-row"><span>PRESET UKURAN CANVAS</span></div>
+                    <div class="grid-4">
+                        <button class="btn-ui" onclick="setCanvasPreset(720, 1280)">9:16</button>
+                        <button class="btn-ui" onclick="setCanvasPreset(1080, 1080)">1:1</button>
+                        <button class="btn-ui" onclick="setCanvasPreset(1080, 1350)">4:5</button>
+                        <button class="btn-ui" onclick="setCanvasPreset(1280, 720)">16:9</button>
+                    </div>
+                </div>
+                <div class="control-block">
+                    <div class="label-row"><span>WARNA BACKGROUND CANVAS</span></div>
+                    <div class="control-row">
+                        <input type="color" id="p-bg-color" value="#ffffff" onchange="updateCanvasBg(this.value)">
+                        <button class="btn-ui" onclick="updateCanvasBg('transparent')">TRANSPARAN</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CORE ADJUSTMENTS -->
+            <div id="pane-core" class="panel-pane">
+                <div class="grid-2">
+                    <div class="control-block">
+                        <div class="label-row"><span>BRIGHTNESS</span><span id="v-bright">0</span></div>
+                        <input type="range" id="p-bright" min="-100" max="100" value="0" oninput="applyPipeline()">
+                    </div>
+                    <div class="control-block">
+                        <div class="label-row"><span>CONTRAST</span><span id="v-contrast">0</span></div>
+                        <input type="range" id="p-contrast" min="-100" max="100" value="0" oninput="applyPipeline()">
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="control-block">
+                        <div class="label-row"><span>SATURATION</span><span id="v-sat">0</span></div>
+                        <input type="range" id="p-sat" min="-100" max="100" value="0" oninput="applyPipeline()">
+                    </div>
+                    <div class="control-block">
+                        <div class="label-row"><span>BLUR</span><span id="v-blur">0</span></div>
+                        <input type="range" id="p-blur" min="0" max="20" value="0" oninput="applyPipeline()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRANSFORM DENGAN ROTOR UKURAN & ROTASI (TIDAK SENTUH OBJEK) -->
+            <div id="pane-transform" class="panel-pane">
+                <div class="control-block">
+                    <div class="label-row"><span>ROTOR UKURAN (SCALE)</span><span id="v-rotor-scale">1.0x</span></div>
+                    <input type="range" id="p-rotor-scale" min="0.1" max="5" step="0.05" value="1" oninput="updateRotorTransform()">
+                </div>
+                <div class="control-block">
+                    <div class="label-row"><span>ROTOR ROTASI (Z ROTATION)</span><span id="v-rotor-rot">0°</span></div>
+                    <input type="range" id="p-rotor-rot" min="0" max="360" value="0" oninput="updateRotorTransform()">
+                </div>
+                <div class="grid-2">
+                    <button class="btn-ui" style="background:#05BDFB; color:#fff; border-color:#05BDFB;" onclick="fitToCanvasArea()">ISI SEMUA AREA CANVAS</button>
+                    <button class="btn-ui" style="background:var(--danger); color:#fff; border-color:var(--danger);" onclick="deleteActiveLayer()">HAPUS OBJEK</button>
+                </div>
+                <div class="grid-2">
+                    <button class="btn-ui" onclick="flipLayer('h')">FLIP HORISONTAL</button>
+                    <button class="btn-ui" onclick="flipLayer('v')">FLIP VERTIKAL</button>
+                </div>
+            </div>
+
+            <!-- BENTUK -->
+            <div id="pane-shape" class="panel-pane">
+                <div class="control-block">
+                    <div class="label-row"><span>TAMBAH BENTUK</span></div>
+                    <div class="grid-4">
+                        <button class="btn-ui" onclick="addShape('rect')">PERSEGI</button>
+                        <button class="btn-ui" onclick="addShape('circle')">LINGKARAN</button>
+                        <button class="btn-ui" onclick="addShape('triangle')">SEGITIGA</button>
+                        <button class="btn-ui" onclick="addShape('arrow')">PANAH</button>
+                    </div>
+                </div>
+                <div class="control-block" id="arrow-controls-block" style="display:none;">
+                    <div class="label-row"><span>PANJANG & LEBAR PANAH</span></div>
+                    <div class="grid-2">
+                        <div class="control-row">
+                            <span>PANJANG:</span>
+                            <input type="range" id="p-arrow-len" min="50" max="600" value="200" oninput="updateShapeProps()">
+                        </div>
+                        <div class="control-row">
+                            <span>LEBAR:</span>
+                            <input type="range" id="p-arrow-width" min="20" max="300" value="80" oninput="updateShapeProps()">
+                        </div>
+                    </div>
+                </div>
+                <div class="control-block">
+                    <div class="label-row"><span>WARNA FILL & STROKE</span></div>
+                    <div class="grid-2">
+                        <div class="control-row"><span>FILL:</span><input type="color" id="p-shape-fill" value="#05BDFB" onchange="updateShapeProps()"></div>
+                        <div class="control-row"><span>STROKE:</span><input type="color" id="p-shape-stroke" value="#0f172a" onchange="updateShapeProps()"></div>
+                    </div>
+                    <div class="control-row" style="margin-top:4px;">
+                        <span>TEBAL:</span><input type="range" id="p-shape-stroke-w" min="0" max="20" value="2" oninput="updateShapeProps()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- TEKS DENGAN FITUR OUTLINE -->
+            <div id="pane-text" class="panel-pane">
+                <div class="grid-2">
+                    <button class="btn-ui" style="background:var(--accent); color:#ffffff; border-color:var(--accent);" onclick="addCenterTextLayer()">+ TEKS BARU</button>
+                    <label class="btn-ui">
+                        UNGGAH FONT
+                        <input type="file" id="fontLoader" accept=".ttf,.otf,.woff" style="display:none;" onchange="loadCustomFont(event)">
+                    </label>
+                </div>
+                <div class="control-block">
+                    <textarea id="p-text-str" placeholder="Tulis teks..." oninput="updateTextProps()"></textarea>
+                </div>
+                <div class="grid-2">
+                    <select id="p-font-family" onchange="updateTextProps()">
+                        <option value="ImpactCustom">Impact (impact.ttf)</option>
+                        <option value="sans-serif">System Sans-Serif</option>
+                        <option value="Arial Black">Arial Black</option>
+                        <option value="Courier New">Monospace</option>
+                    </select>
+                    <div class="control-row"><span>WARNA:</span><input type="color" id="p-text-color" value="#0f172a" onchange="updateTextProps()"></div>
+                </div>
+                <div class="control-block">
+                    <div class="label-row"><span>ALIGNMENT TEKS</span></div>
+                    <select id="p-text-align" onchange="updateTextProps()">
+                        <option value="center">Center (Tengah)</option>
+                        <option value="left">Left (Kiri)</option>
+                        <option value="right">Right (Kanan)</option>
+                        <option value="justify">Justify (Rata Kiri Kanan)</option>
+                    </select>
+                </div>
+                <!-- Pengaturan Outline Teks -->
+                <div class="control-block">
+                    <div class="label-row"><span>OUTLINE / GARIS TEPI TEKS</span></div>
+                    <div class="grid-2">
+                        <div class="control-row"><span>WARNA:</span><input type="color" id="p-text-outline-color" value="#ffffff" onchange="updateTextProps()"></div>
+                        <div class="control-row">
+                            <span>TEBAL:</span>
+                            <input type="range" id="p-text-outline-w" min="0" max="15" value="0" oninput="updateTextProps()">
+                        </div>
+                    </div>
+                </div>
+                <div class="control-block">
+                    <div class="label-row"><span>EFEK TAMBAHAN</span></div>
+                    <div class="grid-2">
+                        <label style="font-size:10px; display:flex; gap:4px; align-items:center;">
+                            <input type="checkbox" id="p-text-3d" onchange="updateTextProps()"> TEKS 3D
+                        </label>
+                        <label style="font-size:10px; display:flex; gap:4px; align-items:center;">
+                            <input type="checkbox" id="p-text-shadow" onchange="updateTextProps()"> BAYANGAN
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OVERLAY & GALERI -->
+            <div id="pane-blend" class="panel-pane">
+                <label class="btn-ui" style="display:flex;">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    AMBIL GAMBAR GALERI
+                    <input type="file" accept="image/*" style="display:none;" onchange="openCropModal(event)">
+                </label>
+                <div class="control-block">
+                    <div class="label-row"><span>BLEND MODE</span></div>
+                    <select id="p-blend-mode" onchange="updateBlendProps()">
+                        <option value="source-over">Normal</option>
+                        <option value="multiply">Multiply</option>
+                        <option value="screen">Screen</option>
+                        <option value="overlay">Overlay</option>
+                    </select>
+                </div>
+                <div class="control-block">
+                    <div class="label-row"><span>OPACITY</span></div>
+                    <input type="range" id="p-layer-opacity" min="0" max="1" step="0.01" value="1" oninput="updateBlendProps()">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Tools -->
+    <div class="footer-tools">
+        <div class="tool-node active" id="tool-select" onclick="setTool('select', this)">
+            <svg viewBox="0 0 24 24"><path d="M3 3l7 18 3-7 7-3L3 3z"/></svg>GESER
+        </div>
+        <div class="tool-node" onclick="addCenterTextLayer()">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>TEKS +
+        </div>
+        <div class="tool-node" onclick="switchTab('shape', document.querySelectorAll('.tab-btn')[3])">
+            <svg viewBox="0 0 24 24"><path d="M12 2l10 6.5v9L12 22 2 17.5v-9z"/></svg>BENTUK
+        </div>
+        <div class="tool-node" onclick="switchTab('blend', document.querySelectorAll('.tab-btn')[4])">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>GALERI
+        </div>
+    </div>
+</div>
+
+<!-- Modal Potong / Crop Gambar -->
+<div class="modal-overlay" id="cropModal">
+    <div class="crop-header">
+        <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+    </div>
+    <div class="crop-viewport" id="cropViewport">
+        <div id="crop-canvas-container">
+            <canvas id="crop-canvas"></canvas>
+            <div id="cropBox" class="crop-box">
+                <div class="crop-grid-line crop-grid-h1"></div>
+                <div class="crop-grid-line crop-grid-h2"></div>
+                <div class="crop-grid-line crop-grid-v1"></div>
+                <div class="crop-grid-line crop-grid-v2"></div>
+
+                <div class="crop-handle handle-tl" data-handle="tl"></div>
+                <div class="crop-handle handle-tr" data-handle="tr"></div>
+                <div class="crop-handle handle-bl" data-handle="bl"></div>
+                <div class="crop-handle handle-br" data-handle="br"></div>
+
+                <div class="crop-handle handle-tm" data-handle="tm"></div>
+                <div class="crop-handle handle-bm" data-handle="bm"></div>
+                <div class="crop-handle handle-lm" data-handle="lm"></div>
+                <div class="crop-handle handle-rm" data-handle="rm"></div>
+            </div>
+        </div>
+    </div>
+    <div class="crop-controls">
+        <div class="crop-ratios-scroll">
+            <div class="ratio-node active" onclick="setCropRatio('free', this)">
+                <div class="ratio-box-icon" style="border-style:dashed;"></div>
+                <span>Free</span>
+            </div>
+            <div class="ratio-node" onclick="setCropRatio(1, this)">
+                <div class="ratio-box-icon"></div>
+                <span>1:1</span>
+            </div>
+            <div class="ratio-node" onclick="setCropRatio(16/9, this)">
+                <div class="ratio-box-icon" style="width:26px;height:15px;"></div>
+                <span>16:9</span>
+            </div>
+            <div class="ratio-node" onclick="setCropRatio(4/3, this)">
+                <div class="ratio-box-icon" style="width:24px;height:18px;"></div>
+                <span>4:3</span>
+            </div>
+            <div class="ratio-node" onclick="setCropRatio(3/2, this)">
+                <div class="ratio-box-icon" style="width:24px;height:16px;"></div>
+                <span>3:2</span>
+            </div>
+            <div class="ratio-node" onclick="setCropRatio(9/16, this)">
+                <div class="ratio-box-icon" style="width:15px;height:26px;"></div>
+                <span>9:16</span>
+            </div>
+            <div class="ratio-node" onclick="setCropRatio(3/4, this)">
+                <div class="ratio-box-icon" style="width:18px;height:24px;"></div>
+                <span>3:4</span>
+            </div>
+            <div class="ratio-node" onclick="setCropRatio(2/3, this)">
+                <div class="ratio-box-icon" style="width:16px;height:24px;"></div>
+                <span>2:3</span>
+            </div>
+        </div>
+
+        <div class="crop-action-bar">
+            <button class="btn-crop-action" onclick="rotateCropImage(-90)">
+                <svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            </button>
+            <button class="btn-crop-action" onclick="rotateCropImage(90)">
+                <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>
+            </button>
+            <button class="btn-crop-action" onclick="flipCropImage('h')">
+                <svg viewBox="0 0 24 24"><path d="M17 3H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4V7a4 4 0 0 0-4-4z"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+            </button>
+            <button class="btn-crop-action" onclick="closeCropModal()">
+                <svg viewBox="0 0 24 24" style="stroke:#ef4444;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <button class="btn-crop-action" onclick="applyCropAndImport()">
+                <svg viewBox="0 0 24 24" style="stroke:#22c55e;"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const stage = document.getElementById('stage');
+    const ctx = stage.getContext('2d', { alpha: true });
+    const overlay = document.getElementById('transform-overlay');
+
+    let layers = [];
+    let activeIndex = null;
+    let historyStack = [];
+    let historyPointer = -1;
+    let activeTool = 'select';
+    let showGrid = false;
+
+    let isMovingObject = false;
+    let pointerId = null;
+    let moveStartX = 0, moveStartY = 0;
+    let initialObjX = 0, initialObjY = 0;
+
+    let rawCropImg = null;
+    let cropBoxState = { x: 0, y: 0, w: 100, h: 100 };
+    let cropRotation = 0;
+    let cropFlipH = 1;
+
+    function initEngine() {
+        createBaseLayer();
+        setupInteractionListeners();
+        saveHistoryState();
+        renderStage();
+    }
+
+    function createBaseLayer() {
+        const baseCanvas = document.createElement('canvas');
+        baseCanvas.width = stage.width;
+        baseCanvas.height = stage.height;
+        const bCtx = baseCanvas.getContext('2d');
+        bCtx.fillStyle = '#ffffff';
+        bCtx.fillRect(0, 0, stage.width, stage.height);
+
+        const layer = {
+            id: 'layer_base',
+            name: 'Base Canvas',
+            type: 'raster',
+            canvas: baseCanvas,
+            x: 0, y: 0, width: stage.width, height: stage.height,
+            scale: 1, rotation: 0,
+            opacity: 1, blendMode: 'source-over',
+            visible: true, locked: true, flipH: 1, flipV: 1,
+            filters: { bright:0, contrast:0, sat:0, blur:0 }
+        };
+        layers.push(layer);
+        activeIndex = 0;
+        rebuildLayerUI();
+    }
+
+    function toggleGrid() {
+        showGrid = !showGrid;
+        document.getElementById('gridToggleBtn').classList.toggle('active', showGrid);
+        renderStage();
+    }
+
+    function toggleMenuDrawer() {
+        document.getElementById('inspectorContainer').classList.toggle('collapsed');
+    }
+
+    function updateCanvasBg(color) {
+        if (!layers[0] || layers[0].id !== 'layer_base') return;
+        const bCtx = layers[0].canvas.getContext('2d');
+        bCtx.clearRect(0, 0, stage.width, stage.height);
+        if (color !== 'transparent') {
+            bCtx.fillStyle = color;
+            bCtx.fillRect(0, 0, stage.width, stage.height);
+        }
+        renderStage();
+        saveHistoryState();
+    }
+
+    function setCanvasPreset(w, h) {
+        stage.width = w;
+        stage.height = h;
+
+        if (layers[0] && layers[0].id === 'layer_base') {
+            const c = document.createElement('canvas');
+            c.width = w;
+            c.height = h;
+            const cCtx = c.getContext('2d');
+            const bgColor = document.getElementById('p-bg-color').value || '#ffffff';
+            cCtx.fillStyle = bgColor;
+            cCtx.fillRect(0, 0, w, h);
+
+            layers[0].canvas = c;
+            layers[0].width = w;
+            layers[0].height = h;
+        }
+
+        renderStage();
+        saveHistoryState();
+    }
+
+    function addShape(shapeType) {
+        const layer = {
+            id: 'shape_' + Date.now(),
+            name: 'Bentuk ' + shapeType.toUpperCase(),
+            type: 'shape',
+            shapeType: shapeType,
+            width: shapeType === 'arrow' ? 200 : 160,
+            height: shapeType === 'arrow' ? 80 : 160,
+            fillColor: document.getElementById('p-shape-fill').value,
+            strokeColor: document.getElementById('p-shape-stroke').value,
+            strokeWidth: parseFloat(document.getElementById('p-shape-stroke-w').value),
+            x: 0, y: 0, scale: 1, rotation: 0,
+            opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1
+        };
+        layers.push(layer);
+        activeIndex = layers.length - 1;
+        rebuildLayerUI();
+        renderStage();
+        saveHistoryState();
+    }
+
+    function addCenterTextLayer() {
+        const layer = {
+            id: 'text_' + Date.now(),
+            name: 'Teks ' + layers.length,
+            type: 'text',
+            text: 'MYshoot',
+            fontSize: 60,
+            width: 260, height: 80,
+            fontFamily: 'ImpactCustom',
+            fillColor: '#05BDFB',
+            strokeColor: '#ffffff',
+            strokeWidth: 2,
+            outlineColor: '#000000',
+            outlineWidth: 0,
+            align: 'center',
+            is3D: false,
+            hasShadow: false,
+            x: 0, y: 0, scale: 1, rotation: 0,
+            opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1
+        };
+        layers.push(layer);
+        activeIndex = layers.length - 1;
+        rebuildLayerUI();
+        renderStage();
+        saveHistoryState();
+    }
+
+    function updateRotorTransform() {
+        if (activeIndex === null || !layers[activeIndex]) return;
+        const l = layers[activeIndex];
+
+        l.scale = parseFloat(document.getElementById('p-rotor-scale').value);
+        l.rotation = parseFloat(document.getElementById('p-rotor-rot').value);
+
+        document.getElementById('v-rotor-scale').innerText = l.scale.toFixed(2) + 'x';
+        document.getElementById('v-rotor-rot').innerText = l.rotation + '°';
+
+        renderStage();
+    }
+
+    function fitToCanvasArea() {
+        if (activeIndex === null || activeIndex === 0 || !layers[activeIndex]) return;
+        const l = layers[activeIndex];
+
+        l.x = 0;
+        l.y = 0;
+        l.rotation = 0;
+        document.getElementById('p-rotor-rot').value = 0;
+        document.getElementById('v-rotor-rot').innerText = '0°';
+
+        l.scale = Math.max(stage.width / l.width, stage.height / l.height);
+        document.getElementById('p-rotor-scale').value = l.scale;
+        document.getElementById('v-rotor-scale').innerText = l.scale.toFixed(2) + 'x';
+
+        renderStage();
+        saveHistoryState();
+    }
+
+    function setupInteractionListeners() {
+        const getStagePos = (e) => {
+            const rect = stage.getBoundingClientRect();
+            return {
+                x: (e.clientX - rect.left) * (stage.width / rect.width),
+                y: (e.clientY - rect.top) * (stage.height / rect.height)
+            };
+        };
+
+        const handlePointerDown = (e) => {
+            const pos = getStagePos(e);
+            const target = e.target;
+
+            if (target.closest('.bbox-move-box') || target.closest('.bbox')) {
+                if (activeIndex === null || !layers[activeIndex] || layers[activeIndex].locked) return;
+                
+                isMovingObject = true;
+                pointerId = e.pointerId;
+                try { target.setPointerCapture(e.pointerId); } catch(err) {}
+
+                const l = layers[activeIndex];
+                moveStartX = pos.x;
+                moveStartY = pos.y;
+                initialObjX = l.x;
+                initialObjY = l.y;
+                e.stopPropagation();
+                return;
+            }
+
+            let clickedIdx = null;
+            for (let i = layers.length - 1; i >= 1; i--) {
+                const l = layers[i];
+                if (!l.visible) continue;
+
+                const hw = (l.width * l.scale) / 2;
+                const hh = (l.height * l.scale) / 2;
+                const objCenterX = stage.width / 2 + l.x;
+                const objCenterY = stage.height / 2 + l.y;
+
+                if (pos.x >= objCenterX - hw && pos.x <= objCenterX + hw &&
+                    pos.y >= objCenterY - hh && pos.y <= objCenterY + hh) {
+                    clickedIdx = i;
+                    break;
+                }
+            }
+
+            if (clickedIdx !== null) {
+                activeIndex = clickedIdx;
+                rebuildLayerUI();
+                renderStage();
+
+                if (!layers[activeIndex].locked) {
+                    isMovingObject = true;
+                    pointerId = e.pointerId;
+                    try { target.setPointerCapture(e.pointerId); } catch(err) {}
+                    const l = layers[activeIndex];
+                    moveStartX = pos.x;
+                    moveStartY = pos.y;
+                    initialObjX = l.x;
+                    initialObjY = l.y;
+                }
+            } 
+            else if (!target.closest('.inspector-container') && !target.closest('.layer-drawer') && !target.closest('.top-bar')) {
+                activeIndex = null;
+                rebuildLayerUI();
+                renderStage();
+            }
+        };
+
+        const handlePointerMove = (e) => {
+            if (!isMovingObject || activeIndex === null || !layers[activeIndex]) return;
+            if (e.pointerId !== pointerId) return;
+
+            const l = layers[activeIndex];
+            if (l.locked) return;
+
+            const pos = getStagePos(e);
+            const dx = pos.x - moveStartX;
+            const dy = pos.y - moveStartY;
+
+            l.x = initialObjX + dx;
+            l.y = initialObjY + dy;
+
+            requestAnimationFrame(() => {
+                renderStage();
+            });
+        };
+
+        const handlePointerUp = (e) => {
+            if (isMovingObject && (pointerId === null || e.pointerId === pointerId)) {
+                isMovingObject = false;
+                pointerId = null;
+                try { e.target.releasePointerCapture(e.pointerId); } catch(err) {}
+                saveHistoryState();
+            }
+        };
+
+        window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+        window.addEventListener('pointermove', handlePointerMove, { passive: true });
+        window.addEventListener('pointerup', handlePointerUp, { passive: true });
+        window.addEventListener('pointercancel', handlePointerUp, { passive: true });
+    }
+
+    function renderStage() {
+        ctx.clearRect(0, 0, stage.width, stage.height);
+
+        layers.forEach((layer) => {
+            if (!layer.visible) return;
+
+            ctx.save();
+            ctx.globalAlpha = layer.opacity;
+            ctx.globalCompositeOperation = layer.blendMode;
+
+            ctx.translate(stage.width / 2 + layer.x, stage.height / 2 + layer.y);
+            ctx.rotate((layer.rotation * Math.PI) / 180);
+            ctx.scale(layer.scale * layer.flipH, layer.scale * layer.flipV);
+
+            if (layer.type === 'raster') {
+                const filtered = applyFilters(layer);
+                ctx.drawImage(filtered, -layer.width / 2, -layer.height / 2, layer.width, layer.height);
+            } else if (layer.type === 'text') {
+                renderTextNode(ctx, layer);
+            } else if (layer.type === 'shape') {
+                renderShapeNode(ctx, layer);
+            }
+
+            ctx.restore();
+        });
+
+        if (showGrid) drawGridOverlay();
+        renderBoundingBox();
+    }
+
+    function drawGridOverlay() {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(5, 189, 251, 0.3)';
+        ctx.lineWidth = 1;
+        const step = 40;
+        for (let x = 0; x < stage.width; x += step) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, stage.height); ctx.stroke();
+        }
+        for (let y = 0; y < stage.height; y += step) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(stage.width, y); ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    function renderShapeNode(targetCtx, l) {
+        targetCtx.beginPath();
+        const w = l.width, h = l.height;
+
+        if (l.shapeType === 'rect') targetCtx.rect(-w/2, -h/2, w, h);
+        else if (l.shapeType === 'circle') targetCtx.arc(0, 0, w/2, 0, Math.PI * 2);
+        else if (l.shapeType === 'triangle') {
+            targetCtx.moveTo(0, -h/2); targetCtx.lineTo(w/2, h/2); targetCtx.lineTo(-w/2, h/2); targetCtx.closePath();
+        } 
+        else if (l.shapeType === 'arrow') {
+            const headLength = Math.min(w * 0.4, 60);
+            const bodyWidth = h * 0.4;
+
+            targetCtx.moveTo(-w/2, -bodyWidth/2);
+            targetCtx.lineTo(w/2 - headLength, -bodyWidth/2);
+            targetCtx.lineTo(w/2 - headLength, -h/2);
+            targetCtx.lineTo(w/2, 0);
+            targetCtx.lineTo(w/2 - headLength, h/2);
+            targetCtx.lineTo(w/2 - headLength, bodyWidth/2);
+            targetCtx.lineTo(-w/2, bodyWidth/2);
+            targetCtx.closePath();
+        }
+
+        if (l.fillColor) { targetCtx.fillStyle = l.fillColor; targetCtx.fill(); }
+        if (l.strokeWidth > 0) { targetCtx.strokeStyle = l.strokeColor; targetCtx.lineWidth = l.strokeWidth; targetCtx.stroke(); }
+    }
+
+    function renderTextNode(targetCtx, l) {
+        targetCtx.font = `${l.fontSize}px "${l.fontFamily}"`;
+        const lines = (l.text || '').split('\n');
+        const lineHeight = l.fontSize * 1.2;
+        const align = l.align || 'center';
+
+        let maxLineWidth = 0;
+        lines.forEach(line => {
+            const w = targetCtx.measureText(line).width;
+            if (w > maxLineWidth) maxLineWidth = w;
+        });
+
+        const totalHeight = lines.length * lineHeight;
+        const startY = -(totalHeight / 2) + (lineHeight / 2);
+
+        lines.forEach((line, index) => {
+            const currentY = startY + (index * lineHeight);
+            let drawX = 0;
+            if (align === 'left') drawX = -maxLineWidth / 2;
+            else if (align === 'right') drawX = maxLineWidth / 2;
+
+            targetCtx.textAlign = align === 'justify' ? 'center' : align;
+            targetCtx.textBaseline = 'middle';
+
+            if (l.outlineWidth && l.outlineWidth > 0) {
+                targetCtx.lineWidth = l.outlineWidth;
+                targetCtx.strokeStyle = l.outlineColor || '#000000';
+                targetCtx.strokeText(line, drawX, currentY);
+            }
+
+            targetCtx.fillStyle = l.fillColor;
+            targetCtx.fillText(line, drawX, currentY);
+        });
+
+        l.width = Math.max(maxLineWidth, 40);
+        l.height = Math.max(totalHeight, 40);
+    }
+
+    function applyFilters(layer) {
+        const f = layer.filters;
+        if (!f) return layer.canvas;
+
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = layer.canvas.width;
+        offCanvas.height = layer.canvas.height;
+        const oCtx = offCanvas.getContext('2d');
+
+        let filterStr = '';
+        if (f.bright) filterStr += `brightness(${100 + parseFloat(f.bright)}%) `;
+        if (f.contrast) filterStr += `contrast(${100 + parseFloat(f.contrast)}%) `;
+        if (f.sat) filterStr += `saturate(${100 + parseFloat(f.sat)}%) `;
+        if (f.blur) filterStr += `blur(${f.blur}px) `;
+
+        oCtx.filter = filterStr.trim() !== '' ? filterStr : 'none';
+        oCtx.drawImage(layer.canvas, 0, 0);
+
+        return offCanvas;
+    }
+
+    function renderBoundingBox() {
+        overlay.innerHTML = '';
+        if (activeIndex === null || activeIndex === 0 || !layers[activeIndex]) return;
+
+        const l = layers[activeIndex];
+        const rect = stage.getBoundingClientRect();
+        const scaleX = rect.width / stage.width;
+        const scaleY = rect.height / stage.height;
+
+        const w = (l.width || 100) * l.scale * scaleX;
+        const h = (l.height || 100) * l.scale * scaleY;
+        const cx = (stage.width / 2 + l.x) * scaleX;
+        const cy = (stage.height / 2 + l.y) * scaleY;
+
+        const box = document.createElement('div');
+        box.className = 'bbox';
+        box.style.width = w + 'px';
+        box.style.height = h + 'px';
+        box.style.left = (cx - w / 2) + 'px';
+        box.style.top = (cy - h / 2) + 'px';
+        box.style.transform = `rotate(${l.rotation}deg)`;
+
+        const delBtn = document.createElement('div');
+        delBtn.className = 'bbox-handle-delete';
+        delBtn.innerHTML = `<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+        delBtn.onclick = (e) => { e.stopPropagation(); deleteActiveLayer(); };
+
+        const lockBtn = document.createElement('div');
+        lockBtn.className = `bbox-handle-lock ${l.locked ? 'locked' : ''}`;
+        lockBtn.innerHTML = l.locked 
+            ? `<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+            : `<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+        lockBtn.onclick = (e) => {
+            e.stopPropagation();
+            l.locked = !l.locked;
+            rebuildLayerUI();
+            renderStage();
+        };
+
+        const moveBox = document.createElement('div');
+        moveBox.className = 'bbox-move-box';
+        moveBox.innerText = 'GESER POSISI';
+
+        box.appendChild(delBtn);
+        box.appendChild(lockBtn);
+        box.appendChild(moveBox);
+        overlay.appendChild(box);
+    }
+
+    function deleteActiveLayer() {
+        if (activeIndex !== null && activeIndex > 0) {
+            layers.splice(activeIndex, 1);
+            activeIndex = layers.length - 1;
+            rebuildLayerUI();
+            renderStage();
+            saveHistoryState();
+        }
+    }
+
+    function moveLayerUp(idx, event) {
+        event.stopPropagation();
+        if (idx >= layers.length - 1) return;
+        const temp = layers[idx];
+        layers[idx] = layers[idx + 1];
+        layers[idx + 1] = temp;
+        activeIndex = idx + 1;
+        rebuildLayerUI();
+        renderStage();
+        saveHistoryState();
+    }
+
+    function moveLayerDown(idx, event) {
+        event.stopPropagation();
+        if (idx <= 1) return;
+        const temp = layers[idx];
+        layers[idx] = layers[idx - 1];
+        layers[idx - 1] = temp;
+        activeIndex = idx - 1;
+        rebuildLayerUI();
+        renderStage();
+        saveHistoryState();
+    }
+
+    function updateShapeProps() {
+        if (activeIndex === null || !layers[activeIndex]) return;
+        const l = layers[activeIndex];
+        if (l.type !== 'shape') return;
+
+        l.fillColor = document.getElementById('p-shape-fill').value;
+        l.strokeColor = document.getElementById('p-shape-stroke').value;
+        l.strokeWidth = parseFloat(document.getElementById('p-shape-stroke-w').value);
+
+        if (l.shapeType === 'arrow') {
+            l.width = parseFloat(document.getElementById('p-arrow-len').value);
+            l.height = parseFloat(document.getElementById('p-arrow-width').value);
+        }
+
+        renderStage();
+    }
+
+    function applyPipeline() {
+        if (activeIndex === null || !layers[activeIndex]) return;
+        const l = layers[activeIndex];
+        if (l.type !== 'raster') return;
+
+        l.filters.bright = document.getElementById('p-bright').value;
+        l.filters.contrast = document.getElementById('p-contrast').value;
+        l.filters.sat = document.getElementById('p-sat').value;
+        l.filters.blur = document.getElementById('p-blur').value;
+
+        renderStage();
+    }
+
+    function updateTextProps() {
+        if (activeIndex === null || !layers[activeIndex]) return;
+        const l = layers[activeIndex];
+        if (l.type !== 'text') return;
+
+        l.text = document.getElementById('p-text-str').value;
+        l.fontFamily = document.getElementById('p-font-family').value;
+        l.fillColor = document.getElementById('p-text-color').value;
+        l.outlineColor = document.getElementById('p-text-outline-color').value;
+        l.outlineWidth = parseFloat(document.getElementById('p-text-outline-w').value);
+        l.align = document.getElementById('p-text-align').value;
+        l.is3D = document.getElementById('p-text-3d').checked;
+        l.hasShadow = document.getElementById('p-text-shadow').checked;
+        renderStage();
+    }
+
+    function updateBlendProps() {
+        if (activeIndex === null || !layers[activeIndex]) return;
+        const l = layers[activeIndex];
+        l.blendMode = document.getElementById('p-blend-mode').value;
+        l.opacity = parseFloat(document.getElementById('p-layer-opacity').value);
+        renderStage();
+    }
+
+    function flipLayer(axis) {
+        if (activeIndex === null || !layers[activeIndex]) return;
+        const l = layers[activeIndex];
+        if (axis === 'h') l.flipH *= -1;
+        if (axis === 'v') l.flipV *= -1;
+        renderStage();
+    }
+
+    function toggleLayerLock(idx, event) {
+        event.stopPropagation();
+        layers[idx].locked = !layers[idx].locked;
+        rebuildLayerUI();
+        renderStage();
+    }
+
+    function toggleLayerVisibility(idx, event) {
+        event.stopPropagation();
+        layers[idx].visible = !layers[idx].visible;
+        renderStage();
+        rebuildLayerUI();
+    }
+
+    function toggleLayerDrawer() {
+        document.getElementById('layerDrawer').classList.toggle('open');
+    }
+
+    function rebuildLayerUI() {
+        const container = document.getElementById('layerList');
+        container.innerHTML = '';
+
+        for (let i = layers.length - 1; i >= 0; i--) {
+            const l = layers[i];
+            const item = document.createElement('div');
+            item.className = `layer-item ${i === activeIndex ? 'active' : ''}`;
+            item.onclick = () => selectLayer(i);
+
+            const lockIcon = l.locked 
+                ? `<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>` 
+                : `<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+            
+            const visIcon = l.visible 
+                ? `<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>` 
+                : `<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+
+            item.innerHTML = `
+                <span style="font-weight:700;">${l.name}</span>
+                <div class="layer-controls">
+                    ${i > 0 ? `
+                        <button class="btn-layer-action" onclick="moveLayerUp(${i}, event)" title="Naikkan Layer">
+                            <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+                        </button>
+                        <button class="btn-layer-action" onclick="moveLayerDown(${i}, event)" title="Turunkan Layer">
+                            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                    ` : ''}
+                    <button class="btn-layer-action" onclick="toggleLayerLock(${i}, event)">${lockIcon}</button>
+                    <button class="btn-layer-action" onclick="toggleLayerVisibility(${i}, event)">${visIcon}</button>
+                </div>
+            `;
+            container.appendChild(item);
+        }
+
+        const arrowBlock = document.getElementById('arrow-controls-block');
+        if (activeIndex !== null && layers[activeIndex] && layers[activeIndex].shapeType === 'arrow') {
+            arrowBlock.style.display = 'flex';
+            document.getElementById('p-arrow-len').value = layers[activeIndex].width;
+            document.getElementById('p-arrow-width').value = layers[activeIndex].height;
+        } else {
+            arrowBlock.style.display = 'none';
+        }
+    }
+
+    function selectLayer(idx) {
+        activeIndex = idx;
+        rebuildLayerUI();
+        if (layers[idx]) {
+            document.getElementById('p-rotor-scale').value = layers[idx].scale || 1;
+            document.getElementById('v-rotor-scale').innerText = (layers[idx].scale || 1).toFixed(2) + 'x';
+
+            document.getElementById('p-rotor-rot').value = layers[idx].rotation || 0;
+            document.getElementById('v-rotor-rot').innerText = (layers[idx].rotation || 0) + '°';
+
+            if (layers[idx].type === 'text') {
+                document.getElementById('p-text-str').value = layers[idx].text || '';
+                if (layers[idx].align) document.getElementById('p-text-align').value = layers[idx].align;
+                if (layers[idx].outlineWidth !== undefined) {
+                    document.getElementById('p-text-outline-w').value = layers[idx].outlineWidth;
+                }
+                if (layers[idx].outlineColor) {
+                    document.getElementById('p-text-outline-color').value = layers[idx].outlineColor;
+                }
+            }
+        }
+        renderStage();
+    }
+
+    function mergeSelectedLayer() {
+        if (activeIndex === null || activeIndex === 0) return;
+        const topLayer = layers[activeIndex];
+        const bottomLayer = layers[activeIndex - 1];
+
+        const mergedCanvas = document.createElement('canvas');
+        mergedCanvas.width = stage.width;
+        mergedCanvas.height = stage.height;
+        const mCtx = mergedCanvas.getContext('2d');
+
+        mCtx.drawImage(bottomLayer.canvas, 0, 0);
+        mCtx.drawImage(topLayer.canvas, 0, 0);
+
+        bottomLayer.canvas = mergedCanvas;
+        layers.splice(activeIndex, 1);
+        activeIndex--;
+        rebuildLayerUI();
+        renderStage();
+        saveHistoryState();
+    }
+
+    function duplicateActiveLayer() {
+        if (activeIndex === null || !layers[activeIndex]) return;
+        const l = layers[activeIndex];
+        const dupCanvas = document.createElement('canvas');
+        dupCanvas.width = l.canvas ? l.canvas.width : stage.width;
+        dupCanvas.height = l.canvas ? l.canvas.height : stage.height;
+        if (l.canvas) dupCanvas.getContext('2d').drawImage(l.canvas, 0, 0);
+
+        const newLayer = JSON.parse(JSON.stringify(l));
+        newLayer.id = 'layer_' + Date.now();
+        newLayer.name = l.name + ' Copy';
+        newLayer.canvas = dupCanvas;
+
+        layers.push(newLayer);
+        activeIndex = layers.length - 1;
+        rebuildLayerUI();
+        renderStage();
+        saveHistoryState();
+    }
+
+    function saveHistoryState() {
+        if (historyPointer < historyStack.length - 1) {
+            historyStack = historyStack.slice(0, historyPointer + 1);
+        }
+        const stateDump = JSON.stringify(layers.map(l => ({
+            ...l, canvasData: l.canvas ? l.canvas.toDataURL() : null
+        })));
+        historyStack.push(stateDump);
+        historyPointer = historyStack.length - 1;
+    }
+
+    function undo() {
+        if (historyPointer > 0) {
+            historyPointer--;
+            restoreState(historyStack[historyPointer]);
+        }
+    }
+
+    function redo() {
+        if (historyPointer < historyStack.length - 1) {
+            historyPointer++;
+            restoreState(historyStack[historyPointer]);
+        }
+    }
+
+    function restoreState(jsonDump) {
+        const parsed = JSON.parse(jsonDump);
+        layers = parsed.map(l => {
+            const canvas = document.createElement('canvas');
+            canvas.width = stage.width;
+            canvas.height = stage.height;
+            if (l.canvasData) {
+                const img = new Image();
+                img.src = l.canvasData;
+                img.onload = () => {
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    renderStage();
+                };
+            }
+            return { ...l, canvas: canvas };
+        });
+        rebuildLayerUI();
+        renderStage();
+    }
+
+    function openCropModal(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const img = new Image();
+            img.onload = () => {
+                rawCropImg = img;
+                cropRotation = 0;
+                cropFlipH = 1;
+
+                const modal = document.getElementById('cropModal');
+                renderCropCanvas();
+
+                cropBoxState = { x: img.width * 0.1, y: img.height * 0.1, w: img.width * 0.8, h: img.height * 0.8 };
+                updateCropBoxUI();
+
+                modal.classList.add('open');
+                initCropInteractivity();
+            };
+            img.src = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function renderCropCanvas() {
+        if (!rawCropImg) return;
+        const cropCanvas = document.getElementById('crop-canvas');
+        const cCtx = cropCanvas.getContext('2d');
+
+        if (cropRotation % 180 === 0) {
+            cropCanvas.width = rawCropImg.width;
+            cropCanvas.height = rawCropImg.height;
+        } else {
+            cropCanvas.width = rawCropImg.height;
+            cropCanvas.height = rawCropImg.width;
+        }
+
+        cCtx.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+        cCtx.save();
+        cCtx.translate(cropCanvas.width / 2, cropCanvas.height / 2);
+        cCtx.rotate((cropRotation * Math.PI) / 180);
+        cCtx.scale(cropFlipH, 1);
+        cCtx.drawImage(rawCropImg, -rawCropImg.width / 2, -rawCropImg.height / 2);
+        cCtx.restore();
+    }
+
+    function rotateCropImage(deg) {
+        cropRotation = (cropRotation + deg + 360) % 360;
+        renderCropCanvas();
+        cropBoxState = { x: 0, y: 0, w: document.getElementById('crop-canvas').width, h: document.getElementById('crop-canvas').height };
+        updateCropBoxUI();
+    }
+
+    function flipCropImage(axis) {
+        if (axis === 'h') cropFlipH *= -1;
+        renderCropCanvas();
+    }
+
+    function setCropRatio(ratio, elem) {
+        document.querySelectorAll('.ratio-node').forEach(n => n.classList.remove('active'));
+        if(elem) elem.classList.add('active');
+
+        const cropCanvas = document.getElementById('crop-canvas');
+        if (ratio === 'free') {
+            cropBoxState.w = cropCanvas.width * 0.8;
+            cropBoxState.h = cropCanvas.height * 0.8;
+        } else {
+            cropBoxState.w = cropCanvas.width * 0.7;
+            cropBoxState.h = cropBoxState.w / ratio;
+            if (cropBoxState.h > cropCanvas.height) {
+                cropBoxState.h = cropCanvas.height * 0.7;
+                cropBoxState.w = cropBoxState.h * ratio;
+            }
+        }
+        cropBoxState.x = (cropCanvas.width - cropBoxState.w) / 2;
+        cropBoxState.y = (cropCanvas.height - cropBoxState.h) / 2;
+        updateCropBoxUI();
+    }
+
+    function updateCropBoxUI() {
+        const cropBox = document.getElementById('cropBox');
+        const cropCanvas = document.getElementById('crop-canvas');
+        const rect = cropCanvas.getBoundingClientRect();
+        const scaleX = rect.width / cropCanvas.width;
+        const scaleY = rect.height / cropCanvas.height;
+
+        cropBox.style.left = (cropBoxState.x * scaleX) + 'px';
+        cropBox.style.top = (cropBoxState.y * scaleY) + 'px';
+        cropBox.style.width = (cropBoxState.w * scaleX) + 'px';
+        cropBox.style.height = (cropBoxState.h * scaleY) + 'px';
+    }
+
+    function initCropInteractivity() {
+        const cropBox = document.getElementById('cropBox');
+        let activeHandle = null;
+        let startX = 0, startY = 0;
+        let initialBox = { ...cropBoxState };
+
+        const onStart = (e) => {
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            if (e.target.dataset.handle) {
+                activeHandle = e.target.dataset.handle;
+            } else {
+                activeHandle = 'move';
+            }
+
+            startX = clientX;
+            startY = clientY;
+            initialBox = { ...cropBoxState };
+            e.stopPropagation();
+        };
+
+        const onMove = (e) => {
+            if (!activeHandle || !rawCropImg) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const cropCanvas = document.getElementById('crop-canvas');
+            const rect = cropCanvas.getBoundingClientRect();
+            const scaleX = cropCanvas.width / rect.width;
+            const scaleY = cropCanvas.height / rect.height;
+
+            const dx = (clientX - startX) * scaleX;
+            const dy = (clientY - startY) * scaleY;
+
+            if (activeHandle === 'move') {
+                cropBoxState.x = Math.max(0, Math.min(cropCanvas.width - cropBoxState.w, initialBox.x + dx));
+                cropBoxState.y = Math.max(0, Math.min(cropCanvas.height - cropBoxState.h, initialBox.y + dy));
+            } else {
+                if (activeHandle.includes('r')) cropBoxState.w = Math.max(30, Math.min(cropCanvas.width - initialBox.x, initialBox.w + dx));
+                if (activeHandle.includes('b')) cropBoxState.h = Math.max(30, Math.min(cropCanvas.height - initialBox.y, initialBox.h + dy));
+                if (activeHandle.includes('l')) {
+                    const newW = Math.max(30, initialBox.w - dx);
+                    cropBoxState.x = initialBox.x + (initialBox.w - newW);
+                    cropBoxState.w = newW;
+                }
+                if (activeHandle.includes('t')) {
+                    const newH = Math.max(30, initialBox.h - dy);
+                    cropBoxState.y = initialBox.y + (initialBox.h - newH);
+                    cropBoxState.h = newH;
+                }
+            }
+
+            updateCropBoxUI();
+        };
+
+        const onEnd = () => { activeHandle = null; };
+
+        cropBox.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+
+        cropBox.addEventListener('touchstart', onStart, { passive: false });
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onEnd);
+    }
+
+    function closeCropModal() {
+        document.getElementById('cropModal').classList.remove('open');
+    }
+
+    function applyCropAndImport() {
+        if (!rawCropImg) return;
+
+        const cropCanvas = document.getElementById('crop-canvas');
+        const croppedCanvas = document.createElement('canvas');
+        croppedCanvas.width = cropBoxState.w;
+        croppedCanvas.height = cropBoxState.h;
+        const cCtx = croppedCanvas.getContext('2d');
+
+        cCtx.drawImage(
+            cropCanvas,
+            cropBoxState.x, cropBoxState.y, cropBoxState.w, cropBoxState.h,
+            0, 0, cropBoxState.w, cropBoxState.h
+        );
+
+        const layer = {
+            id: 'img_' + Date.now(),
+            name: 'Gambar ' + (layers.length + 1),
+            type: 'raster',
+            canvas: croppedCanvas,
+            width: cropBoxState.w, height: cropBoxState.h,
+            x: 0, y: 0, scale: Math.min(stage.width / cropBoxState.w, stage.height / cropBoxState.h) * 0.8,
+            rotation: 0,
+            opacity: 1, blendMode: 'source-over', visible: true, locked: false, flipH: 1, flipV: 1,
+            filters: { bright:0, contrast:0, sat:0, blur:0 }
+        };
+
+        layers.push(layer);
+        activeIndex = layers.length - 1;
+        rebuildLayerUI();
+        renderStage();
+        saveHistoryState();
+        closeCropModal();
+    }
+
+    function loadCustomFont(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const fontName = 'CustomFont_' + Date.now();
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            const fontFace = new FontFace(fontName, evt.target.result);
+            await fontFace.load();
+            document.fonts.add(fontFace);
+
+            const fontSelect = document.getElementById('p-font-family');
+            const opt = document.createElement('option');
+            opt.value = fontName;
+            opt.innerText = file.name.split('.')[0];
+            fontSelect.appendChild(opt);
+            fontSelect.value = fontName;
+
+            updateTextProps();
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function switchTab(tabKey, element) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.panel-pane').forEach(p => p.classList.remove('active'));
+
+        element.classList.add('active');
+        document.getElementById(`pane-${tabKey}`).classList.add('active');
+    }
+
+    function setTool(toolName, element) {
+        activeTool = toolName;
+        document.querySelectorAll('.tool-node').forEach(n => n.classList.remove('active'));
+        element.classList.add('active');
+    }
+
+    function exportCanvas() {
+        const link = document.createElement('a');
+        link.download = `MYshoot_Export_${Date.now()}.png`;
+        link.href = stage.toDataURL('image/png', 1.0);
+        link.click();
+    }
+
+    initEngine();
+</script>
+</body>
+</html>
